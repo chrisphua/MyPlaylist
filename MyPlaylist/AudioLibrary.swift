@@ -1,0 +1,121 @@
+import Foundation
+import AVFoundation
+import Combine
+
+class AudioLibrary: ObservableObject {
+    @Published private(set) var tracks: [AudioTrack] = []
+    @Published var importError: String?
+    @Published private(set) var isImporting = false
+
+    private let persistenceKey = "savedTracks"
+
+    // Shared directory where imported audio files are copied for offline playback.
+    static let audioFilesDirectory: URL = {
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let dir = docs.appendingPathComponent("AudioFiles")
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir
+    }()
+
+    init() {
+        loadTracks()
+    }
+
+    // MARK: - Import
+
+    // Fires a background Task so the call site stays synchronous.
+    func importFile(from url: URL) {
+        Task { await performImport(from: url) }
+    }
+
+    @MainActor
+    private func performImport(from url: URL) async {
+        isImporting = true
+        defer { isImporting = false }
+
+        let accessing = url.startAccessingSecurityScopedResource()
+        defer { if accessing { url.stopAccessingSecurityScopedResource() } }
+
+        let ext = url.pathExtension.lowercased()
+        let supported = ["mp3", "m4a", "aac", "wav", "aiff", "aif", "caf", "flac"]
+        guard supported.contains(ext) else {
+            importError = "Unsupported file format. Please choose an mp3, m4a, wav, aiff, or similar audio file."
+            return
+        }
+
+        let filename = UUID().uuidString + "." + ext
+        let destination = Self.audioFilesDirectory.appendingPathComponent(filename)
+
+        do {
+            // NSFileCoordinator downloads iCloud Drive placeholders before copying.
+            try await coordinatedCopy(from: url, to: destination)
+            let duration = audioDuration(for: destination)
+            let title = url.deletingPathExtension().lastPathComponent
+            let track = AudioTrack(title: title, filename: filename, duration: duration)
+            tracks.append(track)
+            saveTracks()
+        } catch {
+            importError = "Could not import the file. If it's stored in iCloud, make sure it has finished downloading and try again."
+        }
+    }
+
+    // Coordinates file access so iOS downloads iCloud files before we copy them.
+    private func coordinatedCopy(from source: URL, to destination: URL) async throws {
+        try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.global(qos: .userInitiated).async {
+                var coordinatorError: NSError?
+                var blockCalled = false
+                let coordinator = NSFileCoordinator()
+                coordinator.coordinate(
+                    readingItemAt: source,
+                    options: .withoutChanges,
+                    error: &coordinatorError
+                ) { localURL in
+                    blockCalled = true
+                    do {
+                        try FileManager.default.copyItem(at: localURL, to: destination)
+                        continuation.resume()
+                    } catch {
+                        continuation.resume(throwing: error)
+                    }
+                }
+                if !blockCalled, let error = coordinatorError {
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+
+    // MARK: - Delete
+
+    func deleteTrack(_ track: AudioTrack) {
+        tracks.removeAll { $0.id == track.id }
+        try? FileManager.default.removeItem(at: track.fileURL)
+        saveTracks()
+    }
+
+    // MARK: - Persistence
+
+    private func saveTracks() {
+        guard let data = try? JSONEncoder().encode(tracks) else { return }
+        UserDefaults.standard.set(data, forKey: persistenceKey)
+    }
+
+    private func loadTracks() {
+        guard
+            let data = UserDefaults.standard.data(forKey: persistenceKey),
+            let saved = try? JSONDecoder().decode([AudioTrack].self, from: data)
+        else { return }
+        // Drop entries whose copied files are no longer on disk
+        let existing = saved.filter { FileManager.default.fileExists(atPath: $0.fileURL.path) }
+        tracks = existing
+        if existing.count != saved.count { saveTracks() }
+    }
+
+    // MARK: - Helpers
+
+    private func audioDuration(for url: URL) -> TimeInterval {
+        guard let player = try? AVAudioPlayer(contentsOf: url) else { return 0 }
+        return player.duration
+    }
+}

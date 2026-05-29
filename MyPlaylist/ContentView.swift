@@ -1,24 +1,25 @@
-//
-//  ContentView.swift
-//  MyPlaylist
-//
-//  Created by Chris Phua on 22/5/26.
-//
-
 import SwiftUI
 
 struct ContentView: View {
+    @State private var selectedTab = 0
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        TabView(selection: $selectedTab) {
+            LibraryView(selectedTab: $selectedTab)
+                .tabItem { Label("Playlist", systemImage: "music.note.list") }
+                .tag(0)
+            NowPlayingView()
+                .tabItem { Label("Now Playing", systemImage: "play.circle") }
+                .tag(1)
+            SettingsView()
+                .tabItem { Label("Settings", systemImage: "gearshape") }
+                .tag(2)
         }
-        .padding()
     }
 }
 
 #Preview {
     ContentView()
+        .environmentObject(AudioLibrary())
+        .environmentObject(AudioPlayer())
 }
