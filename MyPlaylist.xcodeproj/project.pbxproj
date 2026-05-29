@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		FC81E3A02FC0AEFF00EC98EC /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = FC81E39F2FC0AEFF00EC98EC /* GoogleMobileAds */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		FCF450302FC04FA3005D7F2D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -29,9 +33,22 @@
 		FCF450392FC04FA3005D7F2D /* MyPlaylistUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MyPlaylistUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		FC4F59E92FC05EAA00C78CA2 /* Exceptions for "MyPlaylist" folder in "MyPlaylist" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = FCF450212FC04FA2005D7F2D /* MyPlaylist */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		FCF450242FC04FA2005D7F2D /* MyPlaylist */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				FC4F59E92FC05EAA00C78CA2 /* Exceptions for "MyPlaylist" folder in "MyPlaylist" target */,
+			);
 			path = MyPlaylist;
 			sourceTree = "<group>";
 		};
@@ -52,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FC81E3A02FC0AEFF00EC98EC /* GoogleMobileAds in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +130,7 @@
 			);
 			name = MyPlaylist;
 			packageProductDependencies = (
+				FC81E39F2FC0AEFF00EC98EC /* GoogleMobileAds */,
 			);
 			productName = MyPlaylist;
 			productReference = FCF450222FC04FA2005D7F2D /* MyPlaylist.app */;
@@ -195,6 +214,9 @@
 			);
 			mainGroup = FCF450192FC04FA2005D7F2D;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				FC81E39E2FC0AEFF00EC98EC /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FCF450232FC04FA2005D7F2D /* Products */;
 			projectDirPath = "";
@@ -400,6 +422,7 @@
 				DEVELOPMENT_TEAM = 9ZM956H7Q9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MyPlaylist/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -432,6 +455,7 @@
 				DEVELOPMENT_TEAM = 9ZM956H7Q9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MyPlaylist/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -578,6 +602,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		FC81E39E2FC0AEFF00EC98EC /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		FC81E39F2FC0AEFF00EC98EC /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FC81E39E2FC0AEFF00EC98EC /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = FCF4501A2FC04FA2005D7F2D /* Project object */;
 }
