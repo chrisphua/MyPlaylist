@@ -1,6 +1,18 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%lld songs" : {
+
+    },
+    "Add from Library" : {
+
+    },
+    "Add Songs" : {
+
+    },
+    "Add to Playlist" : {
+
+    },
     "Ads Removed" : {
       "localizations" : {
         "ar" : {
@@ -120,6 +132,9 @@
     "Appearance" : {
 
     },
+    "Cancel" : {
+
+    },
     "Clear" : {
 
     },
@@ -182,10 +197,16 @@
         }
       }
     },
+    "Create" : {
+
+    },
     "Dark" : {
 
     },
     "Default" : {
+
+    },
+    "Done" : {
 
     },
     "Go to Playlist and tap a song to start playing." : {
@@ -362,6 +383,12 @@
         }
       }
     },
+    "Import Files" : {
+
+    },
+    "Import from Files" : {
+
+    },
     "Legal" : {
       "localizations" : {
         "ar" : {
@@ -420,6 +447,12 @@
         }
       }
     },
+    "Name" : {
+
+    },
+    "New Playlist" : {
+
+    },
     "Next" : {
       "localizations" : {
         "ar" : {
@@ -477,6 +510,12 @@
           }
         }
       }
+    },
+    "No Playlists — create one in My Playlists" : {
+
+    },
+    "No Playlists Yet" : {
+
     },
     "No Results" : {
       "localizations" : {
@@ -942,6 +981,9 @@
         }
       }
     },
+    "Play All" : {
+
+    },
     "Playback mode: %@" : {
       "localizations" : {
         "ar" : {
@@ -1232,6 +1274,12 @@
         }
       }
     },
+    "Rename Playlist" : {
+
+    },
+    "Reorder / Remove" : {
+
+    },
     "Repeat One" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1348,6 +1396,9 @@
           }
         }
       }
+    },
+    "Save" : {
+
     },
     "Search songs" : {
       "localizations" : {
@@ -1523,6 +1574,9 @@
           }
         }
       }
+    },
+    "Tap + to create your first playlist." : {
+
     },
     "Tap + to import audio files from the Files app." : {
       "localizations" : {

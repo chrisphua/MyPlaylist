@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct PlaylistDetailView: View {
     let playlist: Playlist
@@ -9,7 +10,8 @@ struct PlaylistDetailView: View {
     @EnvironmentObject private var player: AudioPlayer
     @EnvironmentObject private var ads: AdManager
 
-    @State private var showAddSongs = false
+    @State private var showImporter = false
+    @State private var showAddFromLibrary = false
     @State private var showRename = false
     @State private var newName = ""
     @State private var editMode: EditMode = .inactive
@@ -30,28 +32,60 @@ struct PlaylistDetailView: View {
         .environment(\.editMode, $editMode)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Menu {
-                    Button { showAddSongs = true } label: {
-                        Label("Add Songs", systemImage: "plus")
-                    }
-                    Button {
-                        newName = live.name
-                        showRename = true
+                if library.isImporting {
+                    ProgressView()
+                } else {
+                    Menu {
+                        Button {
+                            showImporter = true
+                        } label: {
+                            Label("Import from Files", systemImage: "folder")
+                        }
+                        Button { showAddFromLibrary = true } label: {
+                            Label("Add from Library", systemImage: "music.note.list")
+                        }
+                        Divider()
+                        Button {
+                            newName = live.name
+                            showRename = true
+                        } label: {
+                            Label("Rename Playlist", systemImage: "pencil")
+                        }
+                        Button {
+                            editMode = editMode == .active ? .inactive : .active
+                        } label: {
+                            Label(editMode == .active ? "Done" : "Reorder / Remove",
+                                  systemImage: editMode == .active ? "checkmark" : "arrow.up.arrow.down")
+                        }
                     } label: {
-                        Label("Rename Playlist", systemImage: "pencil")
+                        Image(systemName: "ellipsis.circle")
                     }
-                    Button {
-                        editMode = editMode == .active ? .inactive : .active
-                    } label: {
-                        Label(editMode == .active ? "Done" : "Reorder / Remove",
-                              systemImage: editMode == .active ? "checkmark" : "arrow.up.arrow.down")
-                    }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
                 }
             }
         }
-        .sheet(isPresented: $showAddSongs) {
+        .fileImporter(
+            isPresented: $showImporter,
+            allowedContentTypes: [.audio, .mpeg4Movie, .movie],
+            allowsMultipleSelection: true
+        ) { result in
+            guard case .success(let urls) = result else { return }
+            Task {
+                for url in urls {
+                    if let track = await library.performImport(from: url) {
+                        playlistManager.addTrack(track, to: live)
+                    }
+                }
+            }
+        }
+        .alert("Import Error", isPresented: Binding(
+            get: { library.importError != nil },
+            set: { if !$0 { library.importError = nil } }
+        )) {
+            Button("OK") { library.importError = nil }
+        } message: {
+            Text(library.importError ?? "")
+        }
+        .sheet(isPresented: $showAddFromLibrary) {
             AddSongsView(playlist: live)
         }
         .alert("Rename Playlist", isPresented: $showRename) {
@@ -64,15 +98,31 @@ struct PlaylistDetailView: View {
     // MARK: - Subviews
 
     private var emptyState: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 20) {
             Image(systemName: "music.note")
                 .font(.system(size: 64))
                 .foregroundStyle(.secondary)
             Text("No Songs Yet")
                 .font(.title2.weight(.semibold))
-            Button("Add Songs") { showAddSongs = true }
+            HStack(spacing: 12) {
+                Button {
+                    showImporter = true
+                } label: {
+                    Label("Import Files", systemImage: "folder")
+                }
                 .buttonStyle(.borderedProminent)
+
+                if !library.tracks.isEmpty {
+                    Button {
+                        showAddFromLibrary = true
+                    } label: {
+                        Label("Add from Library", systemImage: "music.note.list")
+                    }
+                    .buttonStyle(.bordered)
+                }
+            }
         }
+        .padding(.horizontal, 32)
     }
 
     private var trackList: some View {
@@ -112,7 +162,7 @@ struct PlaylistDetailView: View {
     }
 }
 
-// MARK: - Add Songs Sheet
+// MARK: - Add Songs from Library Sheet
 
 struct AddSongsView: View {
     let playlist: Playlist

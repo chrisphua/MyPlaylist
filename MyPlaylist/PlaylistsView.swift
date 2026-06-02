@@ -19,7 +19,7 @@ struct PlaylistsView: View {
                     playlistList
                 }
             }
-            .navigationTitle("My Playlists")
+            .navigationTitle("Playlist")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button {

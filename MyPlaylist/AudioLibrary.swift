@@ -23,13 +23,14 @@ class AudioLibrary: ObservableObject {
 
     // MARK: - Import
 
-    // Fires a background Task so the call site stays synchronous.
+    // Fire-and-forget convenience used by callers that don't need the result.
     func importFile(from url: URL) {
         Task { await performImport(from: url) }
     }
 
-    @MainActor
-    private func performImport(from url: URL) async {
+    // Returns the imported track on success so callers can add it to a playlist.
+    @MainActor @discardableResult
+    func performImport(from url: URL) async -> AudioTrack? {
         isImporting = true
         defer { isImporting = false }
 
@@ -41,7 +42,7 @@ class AudioLibrary: ObservableObject {
                          "mp4", "m4v", "3gp", "3g2", "opus"]
         guard supported.contains(ext) else {
             importError = "Unsupported format. Supported: MP3, AAC, M4A, WAV, AIFF, FLAC, MP4, CAF, OPUS."
-            return
+            return nil
         }
 
         let filename = UUID().uuidString + "." + ext
@@ -55,8 +56,10 @@ class AudioLibrary: ObservableObject {
             let track = AudioTrack(title: title, filename: filename, duration: duration)
             tracks.append(track)
             saveTracks()
+            return track
         } catch {
             importError = "Could not import the file. If it's stored in iCloud, make sure it has finished downloading and try again."
+            return nil
         }
     }
 
