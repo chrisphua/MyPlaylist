@@ -5,6 +5,7 @@ struct LibraryView: View {
     @EnvironmentObject private var library: AudioLibrary
     @EnvironmentObject private var player: AudioPlayer
     @EnvironmentObject private var ads: AdManager
+    @EnvironmentObject private var playlistManager: PlaylistManager
 
     @Binding var selectedTab: Int
     @State private var showImporter = false
@@ -44,12 +45,12 @@ struct LibraryView: View {
             }
             .fileImporter(
                 isPresented: $showImporter,
-                allowedContentTypes: [.audio],
-                allowsMultipleSelection: false
+                allowedContentTypes: [.audio, .mpeg4Movie, .movie],
+                allowsMultipleSelection: true
             ) { result in
                 switch result {
                 case .success(let urls):
-                    if let url = urls.first { library.importFile(from: url) }
+                    for url in urls { library.importFile(from: url) }
                 case .failure:
                     library.importError = "Could not access the selected file."
                 }
@@ -110,6 +111,20 @@ struct LibraryView: View {
                     )
                 }
                 .buttonStyle(.plain)
+                .contextMenu {
+                    if !playlistManager.playlists.isEmpty {
+                        Menu("Add to Playlist") {
+                            ForEach(playlistManager.playlists) { playlist in
+                                Button(playlist.name) {
+                                    playlistManager.addTrack(track, to: playlist)
+                                }
+                            }
+                        }
+                    } else {
+                        Button("No Playlists — create one in My Playlists") {}
+                            .disabled(true)
+                    }
+                }
             }
             .onDelete { indexSet in
                 for index in indexSet {
@@ -122,9 +137,9 @@ struct LibraryView: View {
     }
 }
 
-// MARK: - TrackRow
+// MARK: - TrackRow (internal so PlaylistDetailView can reuse it)
 
-private struct TrackRow: View {
+struct TrackRow: View {
     let track: AudioTrack
     let isCurrentTrack: Bool
     let isPlaying: Bool

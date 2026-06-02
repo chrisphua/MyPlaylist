@@ -11,9 +11,12 @@ struct ContentView: View {
             NowPlayingView()
                 .tabItem { Label("Now Playing", systemImage: "play.circle") }
                 .tag(1)
+            PlaylistsView(selectedTab: $selectedTab)
+                .tabItem { Label("My Playlists", systemImage: "music.note.list") }
+                .tag(2)
             SettingsView()
                 .tabItem { Label("Settings", systemImage: "gearshape") }
-                .tag(2)
+                .tag(3)
         }
     }
 }

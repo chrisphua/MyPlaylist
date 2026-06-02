@@ -8,6 +8,7 @@ struct MyPlaylistApp: App {
     @StateObject private var player = AudioPlayer()
     @StateObject private var ads = AdManager()
     @StateObject private var purchases = PurchaseManager()
+    @StateObject private var playlistManager = PlaylistManager()
     @AppStorage("appAppearance") private var appAppearance = "default"
 
     private var preferredColorScheme: ColorScheme? {
@@ -30,6 +31,7 @@ struct MyPlaylistApp: App {
                 .environmentObject(player)
                 .environmentObject(ads)
                 .environmentObject(purchases)
+                .environmentObject(playlistManager)
                 .preferredColorScheme(preferredColorScheme)
                 .onChange(of: purchases.isAdFree) { _, adFree in
                     ads.isAdFree = adFree

@@ -37,9 +37,10 @@ class AudioLibrary: ObservableObject {
         defer { if accessing { url.stopAccessingSecurityScopedResource() } }
 
         let ext = url.pathExtension.lowercased()
-        let supported = ["mp3", "m4a", "aac", "wav", "aiff", "aif", "caf", "flac"]
+        let supported = ["mp3", "m4a", "aac", "wav", "aiff", "aif", "caf", "flac",
+                         "mp4", "m4v", "3gp", "3g2", "opus"]
         guard supported.contains(ext) else {
-            importError = "Unsupported file format. Please choose an mp3, m4a, wav, aiff, or similar audio file."
+            importError = "Unsupported format. Supported: MP3, AAC, M4A, WAV, AIFF, FLAC, MP4, CAF, OPUS."
             return
         }
 
