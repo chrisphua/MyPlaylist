@@ -8,6 +8,7 @@ struct MyPlaylistApp: App {
     @StateObject private var player = AudioPlayer()
     @StateObject private var ads = AdManager()
     @StateObject private var purchases = PurchaseManager()
+    @StateObject private var playlistManager = PlaylistManager()
     @AppStorage("appAppearance") private var appAppearance = "default"
 
     private var preferredColorScheme: ColorScheme? {
@@ -19,8 +20,11 @@ struct MyPlaylistApp: App {
     }
 
     init() {
-        configureAudioSession()
-        GADMobileAds.sharedInstance().start()
+        // Run heavyweight SDK init off the main thread to prevent startup lag
+        DispatchQueue.global(qos: .userInitiated).async {
+            MyPlaylistApp.configureAudioSession()
+            GADMobileAds.sharedInstance().start()
+        }
     }
 
     var body: some Scene {
@@ -30,6 +34,7 @@ struct MyPlaylistApp: App {
                 .environmentObject(player)
                 .environmentObject(ads)
                 .environmentObject(purchases)
+                .environmentObject(playlistManager)
                 .preferredColorScheme(preferredColorScheme)
                 .onChange(of: purchases.isAdFree) { _, adFree in
                     ads.isAdFree = adFree
@@ -37,7 +42,7 @@ struct MyPlaylistApp: App {
         }
     }
 
-    private func configureAudioSession() {
+    private static func configureAudioSession() {
         try? AVAudioSession.sharedInstance().setCategory(
             .playback,
             mode: .default,

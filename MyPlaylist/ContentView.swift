@@ -5,7 +5,7 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            LibraryView(selectedTab: $selectedTab)
+            PlaylistsView(selectedTab: $selectedTab)
                 .tabItem { Label("Playlist", systemImage: "music.note.list") }
                 .tag(0)
             NowPlayingView()

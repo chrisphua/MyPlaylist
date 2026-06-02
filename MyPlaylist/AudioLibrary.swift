@@ -18,18 +18,34 @@ class AudioLibrary: ObservableObject {
     }()
 
     init() {
-        loadTracks()
+        let directory = Self.audioFilesDirectory
+        let key = persistenceKey
+        Task.detached(priority: .userInitiated) { [weak self] in
+            guard let self else { return }
+            guard
+                let data = UserDefaults.standard.data(forKey: key),
+                let saved = try? JSONDecoder().decode([AudioTrack].self, from: data)
+            else { return }
+            let existing = saved.filter {
+                FileManager.default.fileExists(atPath: directory.appendingPathComponent($0.filename).path)
+            }
+            await MainActor.run {
+                self.tracks = existing
+                if existing.count != saved.count { self.saveTracks() }
+            }
+        }
     }
 
     // MARK: - Import
 
-    // Fires a background Task so the call site stays synchronous.
+    // Fire-and-forget convenience used by callers that don't need the result.
     func importFile(from url: URL) {
         Task { await performImport(from: url) }
     }
 
-    @MainActor
-    private func performImport(from url: URL) async {
+    // Returns the imported track on success so callers can add it to a playlist.
+    @MainActor @discardableResult
+    func performImport(from url: URL) async -> AudioTrack? {
         isImporting = true
         defer { isImporting = false }
 
@@ -37,10 +53,11 @@ class AudioLibrary: ObservableObject {
         defer { if accessing { url.stopAccessingSecurityScopedResource() } }
 
         let ext = url.pathExtension.lowercased()
-        let supported = ["mp3", "m4a", "aac", "wav", "aiff", "aif", "caf", "flac"]
+        let supported = ["mp3", "m4a", "aac", "wav", "aiff", "aif", "caf", "flac",
+                         "mp4", "m4v", "3gp", "3g2", "opus"]
         guard supported.contains(ext) else {
-            importError = "Unsupported file format. Please choose an mp3, m4a, wav, aiff, or similar audio file."
-            return
+            importError = "Unsupported format. Supported: MP3, AAC, M4A, WAV, AIFF, FLAC, MP4, CAF, OPUS."
+            return nil
         }
 
         let filename = UUID().uuidString + "." + ext
@@ -54,8 +71,10 @@ class AudioLibrary: ObservableObject {
             let track = AudioTrack(title: title, filename: filename, duration: duration)
             tracks.append(track)
             saveTracks()
+            return track
         } catch {
             importError = "Could not import the file. If it's stored in iCloud, make sure it has finished downloading and try again."
+            return nil
         }
     }
 
@@ -101,16 +120,6 @@ class AudioLibrary: ObservableObject {
         UserDefaults.standard.set(data, forKey: persistenceKey)
     }
 
-    private func loadTracks() {
-        guard
-            let data = UserDefaults.standard.data(forKey: persistenceKey),
-            let saved = try? JSONDecoder().decode([AudioTrack].self, from: data)
-        else { return }
-        // Drop entries whose copied files are no longer on disk
-        let existing = saved.filter { FileManager.default.fileExists(atPath: $0.fileURL.path) }
-        tracks = existing
-        if existing.count != saved.count { saveTracks() }
-    }
 
     // MARK: - Helpers
 
