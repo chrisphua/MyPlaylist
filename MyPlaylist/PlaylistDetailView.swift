@@ -104,11 +104,12 @@ struct PlaylistDetailView: View {
                 .foregroundStyle(.secondary)
             Text("No Songs Yet")
                 .font(.title2.weight(.semibold))
-            HStack(spacing: 12) {
+            VStack(spacing: 12) {
                 Button {
                     showImporter = true
                 } label: {
                     Label("Import Files", systemImage: "folder")
+                        .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
 
@@ -117,6 +118,7 @@ struct PlaylistDetailView: View {
                         showAddFromLibrary = true
                     } label: {
                         Label("Add from Library", systemImage: "music.note.list")
+                            .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
                 }

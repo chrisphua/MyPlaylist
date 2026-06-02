@@ -18,7 +18,22 @@ class AudioLibrary: ObservableObject {
     }()
 
     init() {
-        loadTracks()
+        let directory = Self.audioFilesDirectory
+        let key = persistenceKey
+        Task.detached(priority: .userInitiated) { [weak self] in
+            guard let self else { return }
+            guard
+                let data = UserDefaults.standard.data(forKey: key),
+                let saved = try? JSONDecoder().decode([AudioTrack].self, from: data)
+            else { return }
+            let existing = saved.filter {
+                FileManager.default.fileExists(atPath: directory.appendingPathComponent($0.filename).path)
+            }
+            await MainActor.run {
+                self.tracks = existing
+                if existing.count != saved.count { self.saveTracks() }
+            }
+        }
     }
 
     // MARK: - Import
@@ -105,16 +120,6 @@ class AudioLibrary: ObservableObject {
         UserDefaults.standard.set(data, forKey: persistenceKey)
     }
 
-    private func loadTracks() {
-        guard
-            let data = UserDefaults.standard.data(forKey: persistenceKey),
-            let saved = try? JSONDecoder().decode([AudioTrack].self, from: data)
-        else { return }
-        // Drop entries whose copied files are no longer on disk
-        let existing = saved.filter { FileManager.default.fileExists(atPath: $0.fileURL.path) }
-        tracks = existing
-        if existing.count != saved.count { saveTracks() }
-    }
 
     // MARK: - Helpers
 

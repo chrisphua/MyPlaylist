@@ -20,8 +20,11 @@ struct MyPlaylistApp: App {
     }
 
     init() {
-        configureAudioSession()
-        GADMobileAds.sharedInstance().start()
+        // Run heavyweight SDK init off the main thread to prevent startup lag
+        DispatchQueue.global(qos: .userInitiated).async {
+            MyPlaylistApp.configureAudioSession()
+            GADMobileAds.sharedInstance().start()
+        }
     }
 
     var body: some Scene {
@@ -39,7 +42,7 @@ struct MyPlaylistApp: App {
         }
     }
 
-    private func configureAudioSession() {
+    private static func configureAudioSession() {
         try? AVAudioSession.sharedInstance().setCategory(
             .playback,
             mode: .default,
