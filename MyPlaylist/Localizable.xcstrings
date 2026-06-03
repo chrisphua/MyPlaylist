@@ -1,16 +1,16 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "%lld songs" : {
+    "%lld tracks" : {
 
     },
     "Add from Library" : {
 
     },
-    "Add Songs" : {
+    "Add to Playlist" : {
 
     },
-    "Add to Playlist" : {
+    "Add Tracks" : {
 
     },
     "Ads Removed" : {
@@ -447,6 +447,12 @@
         }
       }
     },
+    "Library" : {
+
+    },
+    "My Playlists" : {
+
+    },
     "Name" : {
 
     },
@@ -514,9 +520,6 @@
     "No Playlists — create one in My Playlists" : {
 
     },
-    "No Playlists Yet" : {
-
-    },
     "No Results" : {
       "localizations" : {
         "ar" : {
@@ -576,6 +579,7 @@
       }
     },
     "No songs match \"%@\"." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -634,6 +638,7 @@
       }
     },
     "No Songs Yet" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -690,6 +695,12 @@
           }
         }
       }
+    },
+    "No tracks match \"%@\"." : {
+
+    },
+    "No Tracks Yet" : {
+
     },
     "Nothing Playing" : {
       "localizations" : {
@@ -1401,6 +1412,7 @@
 
     },
     "Search songs" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1457,6 +1469,9 @@
           }
         }
       }
+    },
+    "Search tracks" : {
+
     },
     "Settings" : {
       "localizations" : {

@@ -17,19 +17,19 @@ struct LibraryView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if library.tracks.isEmpty {
-                    emptyState
-                } else if filteredTracks.isEmpty {
-                    noResultsState
-                } else {
-                    trackList
-                }
+        Group {
+            if library.tracks.isEmpty {
+                emptyState
+            } else if filteredTracks.isEmpty {
+                noResultsState
+            } else {
+                trackList
             }
-            .navigationTitle("Playlist")
-            .searchable(text: $searchText, prompt: "Search songs")
-            .toolbar {
+        }
+        .navigationTitle("Library")
+        .navigationBarTitleDisplayMode(.large)
+        .searchable(text: $searchText, prompt: "Search tracks")
+        .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     if library.isImporting {
                         ProgressView()
@@ -63,7 +63,6 @@ struct LibraryView: View {
             } message: {
                 Text(library.importError ?? "")
             }
-        }
     }
 
     // MARK: - Subviews
@@ -73,7 +72,7 @@ struct LibraryView: View {
             Image(systemName: "music.note.list")
                 .font(.system(size: 64))
                 .foregroundStyle(.secondary)
-            Text("No Songs Yet")
+            Text("No Tracks Yet")
                 .font(.title2.weight(.semibold))
             Text("Tap + to import audio files from the Files app.")
                 .font(.subheadline)
@@ -90,7 +89,7 @@ struct LibraryView: View {
                 .foregroundStyle(.secondary)
             Text("No Results")
                 .font(.title3.weight(.semibold))
-            Text("No songs match \"\(searchText)\".")
+            Text("No tracks match \"\(searchText)\".")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }

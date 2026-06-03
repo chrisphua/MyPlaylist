@@ -12,11 +12,46 @@ struct PlaylistsView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if playlistManager.playlists.isEmpty {
-                    emptyState
-                } else {
-                    playlistList
+            List {
+                Section {
+                    NavigationLink {
+                        LibraryView(selectedTab: $selectedTab)
+                    } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Library")
+                                .font(.body)
+                            Text("\(library.tracks.count) tracks")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(.vertical, 2)
+                    }
+                }
+
+                Section("My Playlists") {
+                    if playlistManager.playlists.isEmpty {
+                        Text("Tap + to create your first playlist.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(playlistManager.playlists) { playlist in
+                            NavigationLink {
+                                PlaylistDetailView(playlist: playlist, selectedTab: $selectedTab)
+                            } label: {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(playlist.name)
+                                        .font(.body)
+                                    Text("\(playlistManager.tracks(in: playlist, from: library).count) tracks")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                .padding(.vertical, 2)
+                            }
+                        }
+                        .onDelete { indexSet in
+                            for idx in indexSet { playlistManager.delete(playlistManager.playlists[idx]) }
+                        }
+                    }
                 }
             }
             .navigationTitle("Playlist")
@@ -35,45 +70,6 @@ struct PlaylistsView: View {
                 TextField("Name", text: $newName)
                 Button("Create") { playlistManager.create(name: newName) }
                 Button("Cancel", role: .cancel) {}
-            }
-        }
-    }
-
-    // MARK: - Subviews
-
-    private var emptyState: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "music.note.list")
-                .font(.system(size: 64))
-                .foregroundStyle(.secondary)
-            Text("No Playlists Yet")
-                .font(.title2.weight(.semibold))
-            Text("Tap + to create your first playlist.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
-        }
-    }
-
-    private var playlistList: some View {
-        List {
-            ForEach(playlistManager.playlists) { playlist in
-                NavigationLink {
-                    PlaylistDetailView(playlist: playlist, selectedTab: $selectedTab)
-                } label: {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(playlist.name)
-                            .font(.body)
-                        Text("\(playlist.trackIDs.count) songs")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    .padding(.vertical, 2)
-                }
-            }
-            .onDelete { indexSet in
-                for idx in indexSet { playlistManager.delete(playlistManager.playlists[idx]) }
             }
         }
     }

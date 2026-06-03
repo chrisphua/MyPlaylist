@@ -102,7 +102,7 @@ struct PlaylistDetailView: View {
             Image(systemName: "music.note")
                 .font(.system(size: 64))
                 .foregroundStyle(.secondary)
-            Text("No Songs Yet")
+            Text("No Tracks Yet")
                 .font(.title2.weight(.semibold))
             VStack(spacing: 12) {
                 Button {
@@ -173,37 +173,52 @@ struct AddSongsView: View {
     @EnvironmentObject private var library: AudioLibrary
     @Environment(\.dismiss) private var dismiss
 
+    @State private var searchText = ""
+
     private var live: Playlist { playlistManager.live(playlist) }
+
+    private var displayedTracks: [AudioTrack] {
+        let newest = library.tracks.reversed()
+        guard !searchText.isEmpty else { return Array(newest) }
+        return newest.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
+    }
 
     var body: some View {
         NavigationStack {
-            List(library.tracks) { track in
-                let inPlaylist = live.trackIDs.contains(track.id)
-                Button {
-                    if inPlaylist {
-                        playlistManager.removeTrack(track, from: live)
-                    } else {
-                        playlistManager.addTrack(track, to: live)
-                    }
-                } label: {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(track.title)
-                                .foregroundStyle(Color.primary)
-                            if track.duration > 0 {
-                                Text(TimeFormatter.format(track.duration))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
+            List {
+                ForEach(displayedTracks) { track in
+                    let inPlaylist = live.trackIDs.contains(track.id)
+                    Button {
+                        if inPlaylist {
+                            playlistManager.removeTrack(track, from: live)
+                        } else {
+                            playlistManager.addTrack(track, to: live)
                         }
-                        Spacer()
-                        Image(systemName: inPlaylist ? "checkmark.circle.fill" : "plus.circle")
-                            .foregroundStyle(inPlaylist ? .blue : .secondary)
-                            .font(.title3)
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(track.title)
+                                    .foregroundStyle(Color.primary)
+                                if track.duration > 0 {
+                                    Text(TimeFormatter.format(track.duration))
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            Spacer()
+                            Image(systemName: inPlaylist ? "checkmark.circle.fill" : "plus.circle")
+                                .foregroundStyle(inPlaylist ? .blue : .secondary)
+                                .font(.title3)
+                        }
                     }
+                    .buttonStyle(.plain)
+                }
+                .onDelete { indexSet in
+                    for idx in indexSet { library.deleteTrack(displayedTracks[idx]) }
                 }
             }
-            .navigationTitle("Add Songs")
+            .searchable(text: $searchText, prompt: "Search tracks")
+            .navigationTitle("Add Tracks")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
