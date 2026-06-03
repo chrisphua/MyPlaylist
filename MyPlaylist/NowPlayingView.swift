@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct NowPlayingView: View {
     @EnvironmentObject private var player: AudioPlayer
@@ -185,7 +186,10 @@ private struct SeekBar: View {
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { v in
-                        if seekValue == nil { onDragStart() }
+                        if seekValue == nil {
+                            onDragStart()
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        }
                         let t = Double(v.location.x / w) * duration
                         seekValue = t.clamped(to: 0...duration)
                     }

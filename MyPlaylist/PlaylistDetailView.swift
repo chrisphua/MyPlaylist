@@ -15,9 +15,14 @@ struct PlaylistDetailView: View {
     @State private var showRename = false
     @State private var newName = ""
     @State private var editMode: EditMode = .inactive
+    @State private var searchText = ""
 
     private var live: Playlist { playlistManager.live(playlist) }
     private var tracks: [AudioTrack] { playlistManager.tracks(in: live, from: library) }
+    private var displayedTracks: [AudioTrack] {
+        guard !searchText.isEmpty else { return tracks }
+        return tracks.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
+    }
 
     var body: some View {
         Group {
@@ -27,6 +32,7 @@ struct PlaylistDetailView: View {
                 trackList
             }
         }
+        .searchable(text: $searchText, prompt: "Search tracks")
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if player.currentTrack != nil, selectedTab != 1 {
                 MiniPlayerBar(selectedTab: $selectedTab)
@@ -134,10 +140,10 @@ struct PlaylistDetailView: View {
 
     private var trackList: some View {
         List {
-            ForEach(tracks) { track in
+            ForEach(displayedTracks) { track in
                 Button {
                     if player.currentTrack?.id != track.id { ads.recordManualPlay() }
-                    player.play(track: track, in: tracks)
+                    player.play(track: track, in: displayedTracks)
                     selectedTab = 1
                 } label: {
                     TrackRow(
@@ -151,9 +157,10 @@ struct PlaylistDetailView: View {
                 .buttonStyle(.plain)
             }
             .onDelete { indexSet in
-                for idx in indexSet { playlistManager.removeTrack(tracks[idx], from: live) }
+                for idx in indexSet { playlistManager.removeTrack(displayedTracks[idx], from: live) }
             }
             .onMove { from, to in
+                guard searchText.isEmpty else { return }
                 playlistManager.moveTracks(in: live, from: from, to: to)
             }
         }

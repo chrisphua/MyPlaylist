@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject private var player: AudioPlayer
     @State private var selectedTab = 0
 
     var body: some View {
@@ -14,6 +15,14 @@ struct ContentView: View {
             SettingsView(selectedTab: $selectedTab)
                 .tabItem { Label("Settings", systemImage: "gearshape") }
                 .tag(2)
+        }
+        .alert("Playback Error", isPresented: Binding(
+            get: { player.playbackError != nil },
+            set: { if !$0 { player.playbackError = nil } }
+        )) {
+            Button("OK") { player.playbackError = nil }
+        } message: {
+            Text(player.playbackError ?? "")
         }
     }
 }

@@ -126,6 +126,16 @@ class AudioLibrary: ObservableObject {
         }
     }
 
+    // MARK: - Rename
+
+    func renameTrack(_ track: AudioTrack, to newTitle: String) {
+        let trimmed = newTitle.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty,
+              let idx = tracks.firstIndex(where: { $0.id == track.id }) else { return }
+        tracks[idx].title = trimmed
+        saveTracks()
+    }
+
     // MARK: - Delete
 
     func deleteTrack(_ track: AudioTrack) {

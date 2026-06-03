@@ -10,17 +10,28 @@ struct LibraryView: View {
     @Binding var selectedTab: Int
     @State private var showImporter = false
     @State private var searchText = ""
+    @AppStorage("librarySortOrder") private var sortOrder = "newest"
 
-    private var filteredTracks: [AudioTrack] {
-        if searchText.isEmpty { return library.tracks }
-        return library.tracks.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
+    @State private var trackToRename: AudioTrack?
+    @State private var renameText = ""
+
+    private var displayedTracks: [AudioTrack] {
+        let sorted: [AudioTrack]
+        switch sortOrder {
+        case "title":    sorted = library.tracks.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
+        case "duration": sorted = library.tracks.sorted { $0.duration < $1.duration }
+        case "oldest":   sorted = library.tracks
+        default:         sorted = Array(library.tracks.reversed())
+        }
+        guard !searchText.isEmpty else { return sorted }
+        return sorted.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
     }
 
     var body: some View {
         Group {
             if library.tracks.isEmpty {
                 emptyState
-            } else if filteredTracks.isEmpty {
+            } else if displayedTracks.isEmpty {
                 noResultsState
             } else {
                 trackList
@@ -35,39 +46,62 @@ struct LibraryView: View {
         .navigationBarTitleDisplayMode(.large)
         .searchable(text: $searchText, prompt: "Search tracks")
         .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    if library.isImporting {
-                        ProgressView()
-                    } else {
-                        Button {
-                            showImporter = true
-                        } label: {
-                            Image(systemName: "plus")
-                        }
-                        .accessibilityLabel("Import audio file")
+            ToolbarItem(placement: .topBarLeading) {
+                Menu {
+                    Picker("Sort", selection: $sortOrder) {
+                        Text("Newest First").tag("newest")
+                        Text("Oldest First").tag("oldest")
+                        Text("Title A–Z").tag("title")
+                        Text("Duration").tag("duration")
                     }
+                } label: {
+                    Image(systemName: "line.3.horizontal.decrease")
                 }
             }
-            .fileImporter(
-                isPresented: $showImporter,
-                allowedContentTypes: [.audio, .mpeg4Movie, .movie],
-                allowsMultipleSelection: true
-            ) { result in
-                switch result {
-                case .success(let urls):
-                    for url in urls { library.importFile(from: url) }
-                case .failure:
-                    library.importError = "Could not access the selected file."
+            ToolbarItem(placement: .primaryAction) {
+                if library.isImporting {
+                    ProgressView()
+                } else {
+                    Button {
+                        showImporter = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .accessibilityLabel("Import audio file")
                 }
             }
-            .alert("Import Error", isPresented: Binding(
-                get: { library.importError != nil },
-                set: { if !$0 { library.importError = nil } }
-            )) {
-                Button("OK") { library.importError = nil }
-            } message: {
-                Text(library.importError ?? "")
+        }
+        .fileImporter(
+            isPresented: $showImporter,
+            allowedContentTypes: [.audio, .mpeg4Movie, .movie],
+            allowsMultipleSelection: true
+        ) { result in
+            switch result {
+            case .success(let urls):
+                for url in urls { library.importFile(from: url) }
+            case .failure:
+                library.importError = "Could not access the selected file."
             }
+        }
+        .alert("Import Error", isPresented: Binding(
+            get: { library.importError != nil },
+            set: { if !$0 { library.importError = nil } }
+        )) {
+            Button("OK") { library.importError = nil }
+        } message: {
+            Text(library.importError ?? "")
+        }
+        .alert("Rename Track", isPresented: Binding(
+            get: { trackToRename != nil },
+            set: { if !$0 { trackToRename = nil } }
+        )) {
+            TextField("Title", text: $renameText)
+            Button("Save") {
+                if let track = trackToRename { library.renameTrack(track, to: renameText) }
+                trackToRename = nil
+            }
+            Button("Cancel", role: .cancel) { trackToRename = nil }
+        }
     }
 
     // MARK: - Subviews
@@ -102,10 +136,10 @@ struct LibraryView: View {
 
     private var trackList: some View {
         List {
-            ForEach(filteredTracks) { track in
+            ForEach(displayedTracks) { track in
                 Button {
                     if player.currentTrack?.id != track.id { ads.recordManualPlay() }
-                    player.play(track: track, in: library.tracks)
+                    player.play(track: track, in: displayedTracks)
                     selectedTab = 1
                 } label: {
                     TrackRow(
@@ -116,6 +150,12 @@ struct LibraryView: View {
                 }
                 .buttonStyle(.plain)
                 .contextMenu {
+                    Button {
+                        renameText = track.title
+                        trackToRename = track
+                    } label: {
+                        Label("Rename", systemImage: "pencil")
+                    }
                     if !playlistManager.playlists.isEmpty {
                         Menu("Add to Playlist") {
                             ForEach(playlistManager.playlists) { playlist in
@@ -132,7 +172,7 @@ struct LibraryView: View {
             }
             .onDelete { indexSet in
                 for index in indexSet {
-                    let track = filteredTracks[index]
+                    let track = displayedTracks[index]
                     if player.currentTrack?.id == track.id { player.stop() }
                     playlistManager.removeFromAllPlaylists(track)
                     library.deleteTrack(track)

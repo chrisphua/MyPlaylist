@@ -14,6 +14,7 @@ class AudioPlayer: NSObject, ObservableObject {
     @Published private(set) var duration: TimeInterval = 0
     @Published private(set) var playbackMode: PlaybackMode = .next
     @Published private(set) var audioLevel: Float = 0
+    @Published var playbackError: String?
 
     private var player: AVAudioPlayer?
     private var progressTimer: Timer?
@@ -166,6 +167,7 @@ class AudioPlayer: NSObject, ObservableObject {
             updateNowPlayingInfo()
         } catch {
             state = .stopped
+            playbackError = "Could not load \"\(track.title)\". The file may be corrupted or in an unsupported format."
         }
     }
 
@@ -311,6 +313,8 @@ extension AudioPlayer: AVAudioPlayerDelegate {
     }
 
     func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+        let title = currentTrack?.title ?? "this track"
         stop()
+        playbackError = "Playback failed for \"\(title)\". The file may be corrupted."
     }
 }
