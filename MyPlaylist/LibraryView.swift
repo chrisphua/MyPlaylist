@@ -129,6 +129,7 @@ struct LibraryView: View {
                 for index in indexSet {
                     let track = filteredTracks[index]
                     if player.currentTrack?.id == track.id { player.stop() }
+                    playlistManager.removeFromAllPlaylists(track)
                     library.deleteTrack(track)
                 }
             }

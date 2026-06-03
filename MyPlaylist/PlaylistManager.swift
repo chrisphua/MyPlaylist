@@ -47,6 +47,13 @@ class PlaylistManager: ObservableObject {
         save()
     }
 
+    func removeFromAllPlaylists(_ track: AudioTrack) {
+        for idx in playlists.indices {
+            playlists[idx].trackIDs.removeAll { $0 == track.id }
+        }
+        save()
+    }
+
     func moveTracks(in playlist: Playlist, from source: IndexSet, to destination: Int) {
         guard let idx = playlists.firstIndex(where: { $0.id == playlist.id }) else { return }
         playlists[idx].trackIDs.move(fromOffsets: source, toOffset: destination)

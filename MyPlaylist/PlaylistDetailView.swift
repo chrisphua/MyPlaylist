@@ -214,7 +214,11 @@ struct AddSongsView: View {
                     .buttonStyle(.plain)
                 }
                 .onDelete { indexSet in
-                    for idx in indexSet { library.deleteTrack(displayedTracks[idx]) }
+                    for idx in indexSet {
+                        let track = displayedTracks[idx]
+                        playlistManager.removeFromAllPlaylists(track)
+                        library.deleteTrack(track)
+                    }
                 }
             }
             .searchable(text: $searchText, prompt: "Search tracks")
