@@ -3,7 +3,10 @@ import StoreKit
 
 struct SettingsView: View {
     @EnvironmentObject private var purchases: PurchaseManager
+    @EnvironmentObject private var player: AudioPlayer
     @AppStorage("appAppearance") private var appAppearance = "default"
+
+    @Binding var selectedTab: Int
 
     var body: some View {
         NavigationStack {
@@ -61,6 +64,11 @@ struct SettingsView: View {
                         Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")
                             .foregroundStyle(.secondary)
                     }
+                }
+            }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if player.currentTrack != nil, selectedTab != 1 {
+                    MiniPlayerBar(selectedTab: $selectedTab)
                 }
             }
             .navigationTitle("Settings")

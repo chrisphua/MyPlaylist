@@ -66,6 +66,11 @@ struct PlaylistsView: View {
                     .accessibilityLabel("New Playlist")
                 }
             }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if player.currentTrack != nil, selectedTab != 1 {
+                    MiniPlayerBar(selectedTab: $selectedTab)
+                }
+            }
             .alert("New Playlist", isPresented: $showCreate) {
                 TextField("Name", text: $newName)
                 Button("Create") { playlistManager.create(name: newName) }

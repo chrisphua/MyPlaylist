@@ -934,6 +934,9 @@
         }
       }
     },
+    "Paused" : {
+
+    },
     "Play" : {
       "localizations" : {
         "ar" : {
@@ -992,9 +995,6 @@
         }
       }
     },
-    "Play All" : {
-
-    },
     "Playback mode: %@" : {
       "localizations" : {
         "ar" : {
@@ -1052,6 +1052,9 @@
           }
         }
       }
+    },
+    "Playing" : {
+
     },
     "Playlist" : {
       "localizations" : {
@@ -1168,6 +1171,9 @@
           }
         }
       }
+    },
+    "Privacy Policy" : {
+
     },
     "Purchase Error" : {
       "localizations" : {

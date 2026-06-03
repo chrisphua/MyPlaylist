@@ -27,6 +27,11 @@ struct PlaylistDetailView: View {
                 trackList
             }
         }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if player.currentTrack != nil, selectedTab != 1 {
+                MiniPlayerBar(selectedTab: $selectedTab)
+            }
+        }
         .navigationTitle(live.name)
         .navigationBarTitleDisplayMode(.large)
         .environment(\.editMode, $editMode)
@@ -129,17 +134,6 @@ struct PlaylistDetailView: View {
 
     private var trackList: some View {
         List {
-            Button {
-                guard let first = tracks.first else { return }
-                ads.recordManualPlay()
-                player.play(track: first, in: tracks)
-                selectedTab = 1
-            } label: {
-                Label("Play All", systemImage: "play.fill")
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(.blue)
-            }
-
             ForEach(tracks) { track in
                 Button {
                     if player.currentTrack?.id != track.id { ads.recordManualPlay() }
@@ -151,6 +145,8 @@ struct PlaylistDetailView: View {
                         isCurrentTrack: player.currentTrack?.id == track.id,
                         isPlaying: player.currentTrack?.id == track.id && player.state == .playing
                     )
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
             }

@@ -26,6 +26,11 @@ struct LibraryView: View {
                 trackList
             }
         }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if player.currentTrack != nil, selectedTab != 1 {
+                MiniPlayerBar(selectedTab: $selectedTab)
+            }
+        }
         .navigationTitle("Library")
         .navigationBarTitleDisplayMode(.large)
         .searchable(text: $searchText, prompt: "Search tracks")
