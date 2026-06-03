@@ -209,6 +209,9 @@
     "Done" : {
 
     },
+    "Duration" : {
+
+    },
     "Go to Playlist and tap a song to start playing." : {
       "localizations" : {
         "ar" : {
@@ -457,6 +460,9 @@
 
     },
     "New Playlist" : {
+
+    },
+    "Newest First" : {
 
     },
     "Next" : {
@@ -876,6 +882,9 @@
         }
       }
     },
+    "Oldest First" : {
+
+    },
     "Pause" : {
       "localizations" : {
         "ar" : {
@@ -994,6 +1003,9 @@
           }
         }
       }
+    },
+    "Playback Error" : {
+
     },
     "Playback mode: %@" : {
       "localizations" : {
@@ -1291,7 +1303,13 @@
         }
       }
     },
+    "Rename" : {
+
+    },
     "Rename Playlist" : {
+
+    },
+    "Rename Track" : {
 
     },
     "Reorder / Remove" : {
@@ -1596,6 +1614,9 @@
         }
       }
     },
+    "Sort" : {
+
+    },
     "Tap + to create your first playlist." : {
 
     },
@@ -1658,6 +1679,12 @@
       }
     },
     "Theme" : {
+
+    },
+    "Title" : {
+
+    },
+    "Title A–Z" : {
 
     },
     "User Agreement" : {
