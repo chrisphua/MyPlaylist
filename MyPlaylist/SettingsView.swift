@@ -46,6 +46,9 @@ struct SettingsView: View {
                 }
 
                 Section("Legal") {
+                    NavigationLink("Privacy Policy") {
+                        PrivacyPolicyView()
+                    }
                     NavigationLink("User Agreement") {
                         UserAgreementView()
                     }
@@ -69,6 +72,58 @@ struct SettingsView: View {
             } message: {
                 Text(purchases.errorMessage ?? "")
             }
+        }
+    }
+}
+
+// MARK: - Privacy Policy
+
+struct PrivacyPolicyView: View {
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                policySection(
+                    title: "Privacy Policy",
+                    body: "Last updated: June 2026\n\nThis policy describes how MyPlaylist handles your information."
+                )
+                policySection(
+                    title: "1. Data We Collect",
+                    body: "MyPlaylist does not collect, store, or transmit any personal data to our servers. All audio files and playlists remain on your device.\n\nThe app uses Google Mobile Ads, which may collect certain device identifiers and usage data to serve advertisements. This is subject to Google's Privacy Policy."
+                )
+                policySection(
+                    title: "2. Advertising",
+                    body: "MyPlaylist displays advertisements provided by Google AdMob. Google may use your device's advertising identifier (IDFA) to show relevant ads. You can opt out of personalised ads at any time via iOS Settings → Privacy & Security → Tracking.\n\nIf you purchase 'Remove Ads', no advertisements will be shown and no advertising data will be collected."
+                )
+                policySection(
+                    title: "3. App Tracking Transparency",
+                    body: "On iOS 14 and later, MyPlaylist will ask for your permission before accessing your device's advertising identifier. You can change your preference at any time in iOS Settings → Privacy & Security → Tracking → MyPlaylist."
+                )
+                policySection(
+                    title: "4. In-App Purchases",
+                    body: "Purchase transactions are handled entirely by Apple. MyPlaylist does not have access to your payment information. Apple's privacy policy applies to all transactions."
+                )
+                policySection(
+                    title: "5. Local Storage",
+                    body: "Your library tracks and playlists are stored locally on your device using Apple's standard storage APIs. This data is not shared with anyone."
+                )
+                policySection(
+                    title: "6. Contact",
+                    body: "If you have questions about this policy, you can reach us via the GitHub repository at github.com/chrisphua/MyPlaylist."
+                )
+            }
+            .padding(20)
+        }
+        .navigationTitle("Privacy Policy")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func policySection(title: String, body: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title).font(.headline)
+            Text(body)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }

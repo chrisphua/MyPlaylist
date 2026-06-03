@@ -23,11 +23,10 @@ class AdManager: NSObject, ObservableObject {
 
     override init() {
         super.init()
-        #if DEBUG
-        // To serve test ads on a real device, run once, copy the device hash
-        // from the Xcode console, and add it here.
-        // GADMobileAds.sharedInstance().requestConfiguration.testDeviceIdentifiers = ["YOUR_DEVICE_ID_HERE"]
-        #endif
+    }
+
+    // Called by MyPlaylistApp after UMP consent is obtained and GAD is initialised.
+    func startAdLoading() {
         loadAd()
     }
 

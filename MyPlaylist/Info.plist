@@ -60,6 +60,8 @@
 			<string>3sh42y64l3.skadnetwork</string>
 		</dict>
 	</array>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>This identifier is used to show you relevant ads and measure ad performance. You can change this at any time in Settings.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>UIBackgroundModes</key>
