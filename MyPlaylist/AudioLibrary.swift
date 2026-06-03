@@ -1,6 +1,7 @@
 import Foundation
 import AVFoundation
 import Combine
+import CryptoKit
 
 class AudioLibrary: ObservableObject {
     @Published private(set) var tracks: [AudioTrack] = []
@@ -26,12 +27,24 @@ class AudioLibrary: ObservableObject {
                 let data = UserDefaults.standard.data(forKey: key),
                 let saved = try? JSONDecoder().decode([AudioTrack].self, from: data)
             else { return }
-            let existing = saved.filter {
+            var existing = saved.filter {
                 FileManager.default.fileExists(atPath: directory.appendingPathComponent($0.filename).path)
             }
+            var didUpdateSavedTracks = existing.count != saved.count
+
+            for index in existing.indices where existing[index].contentHash == nil {
+                if let hash = try? Self.fileHash(for: directory.appendingPathComponent(existing[index].filename)) {
+                    existing[index].contentHash = hash
+                    didUpdateSavedTracks = true
+                }
+            }
+
+            let loadedTracks = existing
+            let shouldSaveLoadedTracks = didUpdateSavedTracks
+
             await MainActor.run {
-                self.tracks = existing
-                if existing.count != saved.count { self.saveTracks() }
+                self.tracks = loadedTracks
+                if shouldSaveLoadedTracks { self.saveTracks() }
             }
         }
     }
@@ -67,8 +80,16 @@ class AudioLibrary: ObservableObject {
             // NSFileCoordinator downloads iCloud Drive placeholders before copying.
             try await coordinatedCopy(from: url, to: destination)
             let duration = audioDuration(for: destination)
+            let contentHash = try Self.fileHash(for: destination)
+
+            guard !containsDuplicateTrack(contentHash: contentHash) else {
+                try? FileManager.default.removeItem(at: destination)
+                importError = "This song is already in your library."
+                return nil
+            }
+
             let title = url.deletingPathExtension().lastPathComponent
-            let track = AudioTrack(title: title, filename: filename, duration: duration)
+            let track = AudioTrack(title: title, filename: filename, duration: duration, contentHash: contentHash)
             tracks.append(track)
             saveTracks()
             return track
@@ -126,5 +147,24 @@ class AudioLibrary: ObservableObject {
     private func audioDuration(for url: URL) -> TimeInterval {
         guard let player = try? AVAudioPlayer(contentsOf: url) else { return 0 }
         return player.duration
+    }
+
+    nonisolated private static func fileHash(for url: URL) throws -> String {
+        let handle = try FileHandle(forReadingFrom: url)
+        defer { try? handle.close() }
+
+        var hasher = SHA256()
+        while autoreleasepool(invoking: {
+            let data = handle.readData(ofLength: 1024 * 1024)
+            guard !data.isEmpty else { return false }
+            hasher.update(data: data)
+            return true
+        }) {}
+
+        return hasher.finalize().map { String(format: "%02x", $0) }.joined()
+    }
+
+    private func containsDuplicateTrack(contentHash: String) -> Bool {
+        tracks.contains { $0.contentHash == contentHash }
     }
 }

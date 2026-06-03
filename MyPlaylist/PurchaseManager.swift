@@ -26,12 +26,18 @@ class PurchaseManager: ObservableObject {
     // MARK: - Public
 
     func purchase() async {
-        guard let product else {
-            errorMessage = "Product unavailable. Check your internet connection and try again."
-            return
-        }
         isLoading = true
         defer { isLoading = false }
+
+        if product == nil {
+            await loadProduct()
+        }
+
+        guard let product else {
+            errorMessage = "Product unavailable. StoreKit could not load product ID '\(removeAdsProductID)'. Check the product ID, bundle ID, In-App Purchase capability, Paid Apps Agreement, and scheme StoreKit configuration."
+            return
+        }
+
         do {
             let result = try await product.purchase()
             switch result {
@@ -78,7 +84,15 @@ class PurchaseManager: ObservableObject {
     }
 
     private func loadProduct() async {
-        product = try? await Product.products(for: [removeAdsProductID]).first
+        do {
+            let products = try await Product.products(for: [removeAdsProductID])
+            product = products.first
+            print("StoreKit requested product ID: \(removeAdsProductID), loaded count: \(products.count)")
+        } catch {
+            product = nil
+            errorMessage = "StoreKit product load failed: \(error.localizedDescription)"
+            print("StoreKit product load failed for \(removeAdsProductID): \(error)")
+        }
     }
 
     private func listenForTransactions() async {

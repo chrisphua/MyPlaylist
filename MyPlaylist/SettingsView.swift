@@ -31,7 +31,7 @@ struct SettingsView: View {
                                 if purchases.isLoading {
                                     ProgressView()
                                 } else {
-                                    Text(purchases.product?.displayPrice ?? "$1.00")
+                                    Text(purchases.product?.displayPrice ?? "$0.99")
                                         .foregroundStyle(.secondary)
                                 }
                             }
