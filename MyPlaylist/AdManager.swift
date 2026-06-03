@@ -24,12 +24,9 @@ class AdManager: NSObject, ObservableObject {
     override init() {
         super.init()
         #if DEBUG
-        // Serve test ads on the simulator. To test on a real device, run once,
-        // copy the device hash from the Xcode console, and add it below.
-        GADMobileAds.sharedInstance().requestConfiguration.testDeviceIdentifiers = [
-            GADSimulatorID,
-            // "YOUR_DEVICE_ID_HERE"
-        ]
+        // To serve test ads on a real device, run once, copy the device hash
+        // from the Xcode console, and add it here.
+        // GADMobileAds.sharedInstance().requestConfiguration.testDeviceIdentifiers = ["YOUR_DEVICE_ID_HERE"]
         #endif
         loadAd()
     }
