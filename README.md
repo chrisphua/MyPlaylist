@@ -10,6 +10,7 @@
 ![iOS](https://img.shields.io/badge/iOS-17%2B-000000?logo=apple&logoColor=white)
 ![SwiftUI](https://img.shields.io/badge/SwiftUI-5-0071E3?logo=swift&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-2cb67d)
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ea4aaa?logo=github-sponsors)](https://github.com/sponsors/chrisphua)
 
 </div>
 
@@ -23,16 +24,14 @@
 
 ## Features
 
-| | |
-|---|---|
-| 🎵 **Multi-format import** | MP3, AAC, M4A, WAV, AIFF, FLAC, MP4, CAF, OPUS, and more |
-| 📂 **Playlist management** | Create, rename, reorder, and delete playlists |
-| 🎛 **Audio visualiser** | Pulsing ball with radial amplitude lines, synced to the music |
-| 🔁 **Playback modes** | Sequential, Repeat One, Repeat All, Shuffle |
-| 🌗 **Appearance** | Dark, Light, or follow System setting |
-| 🌍 **Localisation** | English, Spanish, French, German, Portuguese, Japanese, Korean, Simplified Chinese, Traditional Chinese, Arabic |
-| 📵 **Offline first** | All imported files are stored locally — no streaming required |
-| 🔒 **Portrait mode** | Optimised single-orientation UI |
+- 🎵 **Multi-format import** — MP3, AAC, M4A, WAV, AIFF, FLAC, MP4, CAF, OPUS, and more
+- 📂 **Playlist management** — Create, rename, reorder, and delete playlists
+- 🎛 **Audio visualiser** — Pulsing ball with radial amplitude lines, synced to the music
+- 🔁 **Playback modes** — Sequential, Repeat One, Repeat All, Shuffle
+- 🌗 **Appearance** — Dark, Light, or follow System setting
+- 🌍 **Localisation** — English, Spanish, French, German, Portuguese, Japanese, Korean, Simplified Chinese, Traditional Chinese, Arabic
+- 📵 **Offline first** — All imported files are stored locally — no streaming required
+- 🔒 **Portrait mode** — Optimised single-orientation UI
 
 ---
 
@@ -81,6 +80,14 @@ MyPlaylist/
 ├── LibraryView.swift        # Full track library with search
 └── SettingsView.swift       # Appearance & in-app purchase
 ```
+
+---
+
+## Sponsor
+
+If you find MyPlaylist useful, consider sponsoring development!
+
+[![Sponsor on GitHub](https://img.shields.io/badge/Sponsor%20on%20GitHub-%E2%9D%A4-ea4aaa?style=for-the-badge&logo=github-sponsors)](https://github.com/sponsors/chrisphua)
 
 ---
 
