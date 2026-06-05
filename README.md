@@ -6,7 +6,7 @@
 
 [![App Store](https://img.shields.io/badge/App%20Store-Download-0071E3?logo=apple&logoColor=white)](https://chrisphua.github.io/MyPlaylist)
 ![Swift](https://img.shields.io/badge/Swift-5.9-F05138?logo=swift&logoColor=white)
-![iOS](https://img.shields.io/badge/iOS-17%2B-000000?logo=apple&logoColor=white)
+![iOS](https://img.shields.io/badge/iOS-16%2B-000000?logo=apple&logoColor=white)
 ![SwiftUI](https://img.shields.io/badge/SwiftUI-5-0071E3?logo=swift&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-2cb67d)
 [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ea4aaa?logo=github-sponsors)](https://github.com/sponsors/chrisphua)
@@ -43,7 +43,7 @@ Visit the **[landing page](https://chrisphua.github.io/MyPlaylist)** for an over
 ## Requirements
 
 - **Xcode** 15+
-- **iOS** 17+
+- **iOS** 16+
 - **Swift** 5.9+
 
 ---

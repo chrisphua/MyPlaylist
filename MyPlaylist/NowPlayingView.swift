@@ -3,6 +3,7 @@ import UIKit
 
 struct NowPlayingView: View {
     @EnvironmentObject private var player: AudioPlayer
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @State private var seekValue: Double? = nil  // non-nil only while user is dragging
 
@@ -16,8 +17,8 @@ struct NowPlayingView: View {
                 }
             }
             .navigationTitle("Now Playing")
-            .onChange(of: player.currentTrack?.id) { seekValue = nil }
-            .onChange(of: player.state) { if player.state == .stopped { seekValue = nil } }
+            .onChange(of: player.currentTrack?.id) { _ in seekValue = nil }
+            .onChange(of: player.state) { _ in if player.state == .stopped { seekValue = nil } }
         }
     }
 
@@ -41,6 +42,43 @@ struct NowPlayingView: View {
     // MARK: - Player content
 
     private var playerContent: some View {
+        Group {
+            if horizontalSizeClass == .regular {
+                iPadLayout
+            } else {
+                iPhoneLayout
+            }
+        }
+    }
+
+    // Two-column layout for iPad / large screens
+    private var iPadLayout: some View {
+        HStack(alignment: .center, spacing: 0) {
+            VStack(spacing: 20) {
+                Spacer()
+                HexVisualizerView()
+                    .frame(maxWidth: 440)
+                trackInfo
+                Spacer()
+            }
+            .frame(maxWidth: .infinity)
+
+            Divider().padding(.vertical, 48)
+
+            VStack(spacing: 28) {
+                Spacer()
+                progressSection
+                transportControls
+                bottomBar
+                Spacer()
+            }
+            .padding(.horizontal, 40)
+            .frame(maxWidth: .infinity)
+        }
+        .padding(.horizontal, 24)
+    }
+
+    private var iPhoneLayout: some View {
         VStack(spacing: 0) {
             Spacer()
 
@@ -58,7 +96,6 @@ struct NowPlayingView: View {
 
             Spacer().frame(height: 48)
         }
-
     }
 
     // MARK: - Subviews

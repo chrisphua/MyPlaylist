@@ -1,5 +1,16 @@
 import SwiftUI
 
+// Two distinct keys so text-width and container-width don't collide.
+private struct MarqueeTextWidthKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+}
+
+private struct MarqueeContainerWidthKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+}
+
 struct MarqueeText: View {
     let text: String
     var font: Font = .body
@@ -18,9 +29,9 @@ struct MarqueeText: View {
                 .lineLimit(1)
                 .fixedSize()
                 .hidden()
-                .onGeometryChange(for: CGFloat.self) { $0.size.width } action: {
-                    textWidth = $0
-                }
+                .background(GeometryReader { geo in
+                    Color.clear.preference(key: MarqueeTextWidthKey.self, value: geo.size.width)
+                })
 
             // Visible scrolling text
             Text(text)
@@ -32,12 +43,12 @@ struct MarqueeText: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .clipped()
-        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: {
-            containerWidth = $0
-        }
-        .onChange(of: textWidth) { _, _ in restart() }
-        .onChange(of: containerWidth) { _, _ in restart() }
-        .onChange(of: text) { _, _ in offset = 0; restart() }
+        .background(GeometryReader { geo in
+            Color.clear.preference(key: MarqueeContainerWidthKey.self, value: geo.size.width)
+        })
+        .onPreferenceChange(MarqueeTextWidthKey.self) { textWidth = $0; restart() }
+        .onPreferenceChange(MarqueeContainerWidthKey.self) { containerWidth = $0; restart() }
+        .onChange(of: text) { _ in offset = 0; restart() }
         .onDisappear { animTask?.cancel(); offset = 0 }
     }
 
