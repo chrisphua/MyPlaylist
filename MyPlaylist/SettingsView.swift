@@ -1,5 +1,5 @@
 import SwiftUI
-import StoreKit
+// import StoreKit // disabled — IAP removed
 
 struct SettingsView: View {
     @EnvironmentObject private var purchases: PurchaseManager
@@ -20,33 +20,34 @@ struct SettingsView: View {
                     .pickerStyle(.segmented)
                 }
 
-                Section("Remove Ads") {
-                    if purchases.isAdFree {
-                        Label("Ads Removed", systemImage: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
-                    } else {
-                        Button {
-                            Task { await purchases.purchase() }
-                        } label: {
-                            HStack {
-                                Text("Remove Ads")
-                                Spacer()
-                                if purchases.isLoading {
-                                    ProgressView()
-                                } else {
-                                    Text(purchases.product?.displayPrice ?? "$0.99")
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                        }
-                        .disabled(purchases.isLoading)
-
-                        Button("Restore Purchase") {
-                            Task { await purchases.restore() }
-                        }
-                        .disabled(purchases.isLoading)
-                    }
-                }
+                // Disabled — IAP removed
+//                Section("Remove Ads") {
+//                    if purchases.isAdFree {
+//                        Label("Ads Removed", systemImage: "checkmark.circle.fill")
+//                            .foregroundStyle(.green)
+//                    } else {
+//                        Button {
+//                            Task { await purchases.purchase() }
+//                        } label: {
+//                            HStack {
+//                                Text("Remove Ads")
+//                                Spacer()
+//                                if purchases.isLoading {
+//                                    ProgressView()
+//                                } else {
+//                                    Text(purchases.product?.displayPrice ?? "$0.99")
+//                                        .foregroundStyle(.secondary)
+//                                }
+//                            }
+//                        }
+//                        .disabled(purchases.isLoading)
+//
+//                        Button("Restore Purchase") {
+//                            Task { await purchases.restore() }
+//                        }
+//                        .disabled(purchases.isLoading)
+//                    }
+//                }
 
                 Section("Legal") {
                     NavigationLink("Privacy Policy") {
@@ -72,14 +73,15 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
-            .alert("Purchase Error", isPresented: Binding(
-                get: { purchases.errorMessage != nil },
-                set: { if !$0 { purchases.errorMessage = nil } }
-            )) {
-                Button("OK") { purchases.errorMessage = nil }
-            } message: {
-                Text(purchases.errorMessage ?? "")
-            }
+            // Disabled — IAP removed
+//            .alert("Purchase Error", isPresented: Binding(
+//                get: { purchases.errorMessage != nil },
+//                set: { if !$0 { purchases.errorMessage = nil } }
+//            )) {
+//                Button("OK") { purchases.errorMessage = nil }
+//            } message: {
+//                Text(purchases.errorMessage ?? "")
+//            }
         }
     }
 }

@@ -1,3 +1,10 @@
+import Foundation
+import Combine
+
+// MARK: - IAP disabled
+// Uncomment the block below and remove the stub to re-enable in-app purchases.
+
+/*
 import StoreKit
 import Combine
 
@@ -102,4 +109,12 @@ class PurchaseManager: ObservableObject {
             await refreshStatus()
         }
     }
+}
+*/
+
+@MainActor
+class PurchaseManager: ObservableObject {
+    @Published private(set) var isAdFree = false
+    @Published private(set) var isLoading = false
+    @Published var errorMessage: String?
 }

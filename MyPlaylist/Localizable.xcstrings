@@ -14,6 +14,7 @@
 
     },
     "Ads Removed" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1188,6 +1189,7 @@
 
     },
     "Purchase Error" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1246,6 +1248,7 @@
       }
     },
     "Remove Ads" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1375,6 +1378,7 @@
       }
     },
     "Restore Purchase" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {

@@ -1,3 +1,10 @@
+import Foundation
+import Combine
+
+// MARK: - AdMob disabled
+// Uncomment the block below and remove the stub to re-enable ads.
+
+/*
 import GoogleMobileAds
 import UIKit
 import Combine
@@ -76,4 +83,11 @@ extension AdManager: GADFullScreenContentDelegate {
         interstitial = nil
         loadAd()
     }
+}
+*/
+
+class AdManager: NSObject, ObservableObject {
+    var isAdFree = false
+    func startAdLoading() {}
+    func recordManualPlay() {}
 }
