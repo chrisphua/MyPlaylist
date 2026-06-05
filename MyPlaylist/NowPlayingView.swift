@@ -3,9 +3,11 @@ import UIKit
 
 struct NowPlayingView: View {
     @EnvironmentObject private var player: AudioPlayer
+    @EnvironmentObject private var library: AudioLibrary
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @State private var seekValue: Double? = nil  // non-nil only while user is dragging
+    @State private var currentArtwork: UIImage? = nil
 
     var body: some View {
         NavigationStack {
@@ -19,6 +21,11 @@ struct NowPlayingView: View {
             .navigationTitle("Now Playing")
             .onChange(of: player.currentTrack?.id) { _ in seekValue = nil }
             .onChange(of: player.state) { _ in if player.state == .stopped { seekValue = nil } }
+            .task(id: player.currentTrack?.id) {
+                currentArtwork = nil
+                guard let track = player.currentTrack else { return }
+                currentArtwork = await library.artwork(for: track)
+            }
         }
     }
 
@@ -51,12 +58,27 @@ struct NowPlayingView: View {
         }
     }
 
+    private var artworkOrVisualizer: some View {
+        Group {
+            if let image = currentArtwork {
+                Image(uiImage: image)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 280, height: 280)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 8)
+            } else {
+                HexVisualizerView()
+            }
+        }
+    }
+
     // Two-column layout for iPad / large screens
     private var iPadLayout: some View {
         HStack(alignment: .center, spacing: 0) {
             VStack(spacing: 20) {
                 Spacer()
-                HexVisualizerView()
+                artworkOrVisualizer
                     .frame(maxWidth: 440)
                 trackInfo
                 Spacer()
@@ -82,7 +104,7 @@ struct NowPlayingView: View {
         VStack(spacing: 0) {
             Spacer()
 
-            HexVisualizerView()
+            artworkOrVisualizer
 
             Spacer()
 

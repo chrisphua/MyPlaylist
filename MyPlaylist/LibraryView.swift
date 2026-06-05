@@ -191,9 +191,17 @@ struct TrackRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: isPlaying ? "speaker.wave.2.fill" : "music.note")
-                .foregroundStyle(isCurrentTrack ? .blue : .secondary)
-                .frame(width: 20)
+            ZStack {
+                ArtworkImage(track: track, size: 44)
+                if isPlaying {
+                    RoundedRectangle(cornerRadius: 44 * 0.18)
+                        .fill(Color.black.opacity(0.45))
+                        .frame(width: 44, height: 44)
+                    Image(systemName: "speaker.wave.2.fill")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(.white)
+                }
+            }
             VStack(alignment: .leading, spacing: 2) {
                 Text(track.title)
                     .font(.body)

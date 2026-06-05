@@ -2,6 +2,7 @@ import Foundation
 import AVFoundation
 import Combine
 import CryptoKit
+import UIKit
 
 class AudioLibrary: ObservableObject {
     @Published private(set) var tracks: [AudioTrack] = []
@@ -9,6 +10,11 @@ class AudioLibrary: ObservableObject {
     @Published private(set) var isImporting = false
 
     private let persistenceKey = "savedTracks"
+
+    // In-memory artwork cache — keyed by track ID.
+    // nil value means "checked, no artwork found".
+    private var artworkCache: [UUID: UIImage] = [:]
+    private var artworkChecked: Set<UUID> = []
 
     // Shared directory where imported audio files are copied for offline playback.
     static let audioFilesDirectory: URL = {
@@ -47,6 +53,30 @@ class AudioLibrary: ObservableObject {
                 if shouldSaveLoadedTracks { self.saveTracks() }
             }
         }
+    }
+
+    // MARK: - Artwork
+
+    @MainActor
+    func artwork(for track: AudioTrack) async -> UIImage? {
+        if let cached = artworkCache[track.id] { return cached }
+        if artworkChecked.contains(track.id) { return nil }
+
+        let url = track.fileURL
+        let asset = AVAsset(url: url)
+        guard let metadata = try? await asset.load(.commonMetadata) else {
+            artworkChecked.insert(track.id)
+            return nil
+        }
+        for item in metadata where item.commonKey == .commonKeyArtwork {
+            if let data = try? await item.load(.dataValue),
+               let image = UIImage(data: data) {
+                artworkCache[track.id] = image
+                return image
+            }
+        }
+        artworkChecked.insert(track.id)
+        return nil
     }
 
     // MARK: - Import
@@ -140,6 +170,8 @@ class AudioLibrary: ObservableObject {
 
     func deleteTrack(_ track: AudioTrack) {
         tracks.removeAll { $0.id == track.id }
+        artworkCache.removeValue(forKey: track.id)
+        artworkChecked.remove(track.id)
         try? FileManager.default.removeItem(at: track.fileURL)
         saveTracks()
     }
@@ -150,7 +182,6 @@ class AudioLibrary: ObservableObject {
         guard let data = try? JSONEncoder().encode(tracks) else { return }
         UserDefaults.standard.set(data, forKey: persistenceKey)
     }
-
 
     // MARK: - Helpers
 

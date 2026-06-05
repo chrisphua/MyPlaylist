@@ -1,7 +1,10 @@
 import SwiftUI
+import StoreKit
 
 struct ContentView: View {
     @EnvironmentObject private var player: AudioPlayer
+    @EnvironmentObject private var ads: AdManager
+    @Environment(\.requestReview) private var requestReview
     @State private var selectedTab = 0
 
     var body: some View {
@@ -24,6 +27,11 @@ struct ContentView: View {
         } message: {
             Text(player.playbackError ?? "")
         }
+        .onChange(of: ads.shouldRequestReview) { _ in
+            guard ads.shouldRequestReview else { return }
+            requestReview()
+            ads.shouldRequestReview = false
+        }
     }
 }
 
@@ -31,13 +39,18 @@ struct ContentView: View {
 
 struct MiniPlayerBar: View {
     @EnvironmentObject private var player: AudioPlayer
+    @EnvironmentObject private var library: AudioLibrary
     @Binding var selectedTab: Int
 
     var body: some View {
         VStack(spacing: 0) {
             Divider()
             progressBar
-            HStack(spacing: 4) {
+            HStack(spacing: 12) {
+                if let track = player.currentTrack {
+                    ArtworkImage(track: track, size: 40)
+                        .onTapGesture { selectedTab = 1 }
+                }
                 VStack(alignment: .leading, spacing: 2) {
                     Text(player.currentTrack?.title ?? "")
                         .font(.subheadline.weight(.semibold))

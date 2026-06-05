@@ -88,6 +88,22 @@ extension AdManager: GADFullScreenContentDelegate {
 
 class AdManager: NSObject, ObservableObject {
     var isAdFree = false
+    @Published var shouldRequestReview = false
+
+    private let playCountKey = "totalManualPlays"
+    private let lastReviewVersionKey = "lastReviewVersion"
+    private let reviewThreshold = 5
+
     func startAdLoading() {}
-    func recordManualPlay() {}
+
+    func recordManualPlay() {
+        let count = UserDefaults.standard.integer(forKey: playCountKey) + 1
+        UserDefaults.standard.set(count, forKey: playCountKey)
+
+        let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
+        let lastVersion = UserDefaults.standard.string(forKey: lastReviewVersionKey) ?? ""
+        guard currentVersion != lastVersion, count % reviewThreshold == 0 else { return }
+        UserDefaults.standard.set(currentVersion, forKey: lastReviewVersionKey)
+        shouldRequestReview = true
+    }
 }
