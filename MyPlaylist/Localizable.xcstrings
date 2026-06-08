@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%lld Selected" : {
+
+    },
     "%lld tracks" : {
 
     },
@@ -205,6 +208,25 @@
 
     },
     "Default" : {
+
+    },
+    "Delete" : {
+
+    },
+    "Delete %lld track%@?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Delete %1$lld track%2$@?"
+          }
+        }
+      }
+    },
+    "Deleting this app permanently removes all imported tracks and playlists. They cannot be recovered." : {
+
+    },
+    "Deselect All" : {
 
     },
     "Done" : {
@@ -525,6 +547,9 @@
       }
     },
     "No Playlists — create one in My Playlists" : {
+
+    },
+    "No playlists yet" : {
 
     },
     "No Results" : {
@@ -1499,6 +1524,12 @@
       }
     },
     "Search tracks" : {
+
+    },
+    "Select" : {
+
+    },
+    "Select All" : {
 
     },
     "Settings" : {
