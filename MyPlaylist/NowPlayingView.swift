@@ -4,6 +4,7 @@ import UIKit
 struct NowPlayingView: View {
     @EnvironmentObject private var player: AudioPlayer
     @EnvironmentObject private var library: AudioLibrary
+    @EnvironmentObject private var playlistManager: PlaylistManager
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @State private var seekValue: Double? = nil  // non-nil only while user is dragging
@@ -19,6 +20,26 @@ struct NowPlayingView: View {
                 }
             }
             .navigationTitle("Now Playing")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        if playlistManager.playlists.isEmpty {
+                            Button("No playlists yet") {}.disabled(true)
+                        } else {
+                            ForEach(playlistManager.playlists) { playlist in
+                                Button(playlist.name) {
+                                    if let track = player.currentTrack {
+                                        playlistManager.addTrack(track, to: playlist)
+                                    }
+                                }
+                            }
+                        }
+                    } label: {
+                        Label("Add to Playlist", systemImage: "text.badge.plus")
+                    }
+                    .disabled(player.currentTrack == nil)
+                }
+            }
             .onChange(of: player.currentTrack?.id) { _ in seekValue = nil }
             .onChange(of: player.state) { _ in if player.state == .stopped { seekValue = nil } }
             .task(id: player.currentTrack?.id) {
