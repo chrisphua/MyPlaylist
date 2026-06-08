@@ -58,13 +58,20 @@ struct SettingsView: View {
                     }
                 }
 
-                Section("App") {
+                Section {
                     HStack {
                         Text("Version")
                         Spacer()
                         Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")
                             .foregroundStyle(.secondary)
                     }
+                } header: {
+                    Text("App")
+                } footer: {
+                    Label(
+                        "Deleting this app permanently removes all imported tracks and playlists. They cannot be recovered.",
+                        systemImage: "exclamationmark.triangle"
+                    )
                 }
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
