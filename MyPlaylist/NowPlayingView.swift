@@ -9,6 +9,7 @@ struct NowPlayingView: View {
 
     @State private var seekValue: Double? = nil  // non-nil only while user is dragging
     @State private var currentArtwork: UIImage? = nil
+    @State private var showSleepTimerDialog = false
 
     var body: some View {
         NavigationStack {
@@ -49,6 +50,15 @@ struct NowPlayingView: View {
                 let art = await library.artwork(for: track)
                 currentArtwork = art
                 player.currentArtwork = art
+            }
+            .confirmationDialog("Sleep Timer", isPresented: $showSleepTimerDialog, titleVisibility: .visible) {
+                if player.sleepTimerEnd != nil {
+                    Button("Cancel Timer", role: .destructive) { player.cancelSleepTimer() }
+                }
+                Button("15 minutes") { player.setSleepTimer(minutes: 15) }
+                Button("30 minutes") { player.setSleepTimer(minutes: 30) }
+                Button("45 minutes") { player.setSleepTimer(minutes: 45) }
+                Button("60 minutes") { player.setSleepTimer(minutes: 60) }
             }
         }
     }
@@ -207,16 +217,11 @@ struct NowPlayingView: View {
 
     private var bottomBar: some View {
         HStack {
-            // Speed picker
-            Menu {
+            // Speed picker — Picker(.menu) uses UIButton+UIMenu internally, more reliable than Menu
+            Picker(selection: Binding(get: { player.playbackRate },
+                                      set: { player.setPlaybackRate($0) })) {
                 ForEach([Float(0.5), 0.75, 1.0, 1.25, 1.5, 2.0], id: \.self) { rate in
-                    Button { player.setPlaybackRate(rate) } label: {
-                        if player.playbackRate == rate {
-                            Label(speedLabel(rate), systemImage: "checkmark")
-                        } else {
-                            Text(speedLabel(rate))
-                        }
-                    }
+                    Text(speedLabel(rate)).tag(rate)
                 }
             } label: {
                 Text(speedLabel(player.playbackRate))
@@ -229,6 +234,7 @@ struct NowPlayingView: View {
                     )
                     .contentShape(Rectangle())
             }
+            .pickerStyle(.menu)
 
             Spacer()
 
@@ -244,16 +250,8 @@ struct NowPlayingView: View {
 
             Spacer()
 
-            // Sleep timer
-            Menu {
-                if player.sleepTimerEnd != nil {
-                    Button("Cancel Timer", role: .destructive) { player.cancelSleepTimer() }
-                }
-                Button("15 min") { player.setSleepTimer(minutes: 15) }
-                Button("30 min") { player.setSleepTimer(minutes: 30) }
-                Button("45 min") { player.setSleepTimer(minutes: 45) }
-                Button("60 min") { player.setSleepTimer(minutes: 60) }
-            } label: {
+            // Sleep timer — Button + confirmationDialog uses UIAlertController, most reliable
+            Button { showSleepTimerDialog = true } label: {
                 Group {
                     if let end = player.sleepTimerEnd {
                         Text(TimeFormatter.format(max(0, end.timeIntervalSinceNow)))
@@ -270,6 +268,7 @@ struct NowPlayingView: View {
                 )
                 .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
         }
     }
 
