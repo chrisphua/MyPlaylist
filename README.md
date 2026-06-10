@@ -24,9 +24,12 @@
 ## Features
 
 - 🎵 **Multi-format import** — MP3, AAC, M4A, WAV, AIFF, FLAC, MP4, CAF, OPUS, and more
-- 📂 **Playlist management** — Create, rename, reorder, and delete playlists
-- 🎛 **Audio visualiser** — Pulsing ball with radial amplitude lines, synced to the music
+- 📂 **Playlist management** — Create, rename, reorder, delete, and bulk-select tracks across playlists
+- 🖼 **Album art** — Reads artwork from ID3/iTunes tags; shown in the library, mini player, Now Playing, and lock screen
+- 🎛 **Audio visualiser** — Pulsing visualiser with radial amplitude lines, shown when no artwork is available
 - 🔁 **Playback modes** — Sequential, Repeat One, Repeat All, Shuffle
+- ⚡ **Playback speed** — 0.5× to 2× in six steps, persisted across tracks
+- 🌙 **Sleep timer** — Auto-stop after 15, 30, 45, or 60 minutes with live countdown
 - 🌗 **Appearance** — Dark, Light, or follow System setting
 - 🌍 **Localisation** — English, Spanish, French, German, Portuguese, Japanese, Korean, Simplified Chinese, Traditional Chinese, Arabic
 - 📵 **Offline first** — All imported files are stored locally — no streaming required
@@ -60,24 +63,23 @@ Visit the **[landing page](https://chrisphua.github.io/MyPlaylist)** for an over
 
 3. Select your target device or simulator and press **⌘R** to build and run.
 
-> **Note:** Ad unit IDs are included for development. Debug and TestFlight builds use Google's test ad units automatically.
-
 ---
 
 ## Architecture
 
 ```
 MyPlaylist/
-├── AudioLibrary.swift       # File import, persistence, track management
-├── AudioPlayer.swift        # AVAudioPlayer wrapper, metering, playback state
+├── AudioLibrary.swift       # File import, persistence, artwork loading
+├── AudioPlayer.swift        # AVAudioPlayer wrapper, speed, sleep timer, remote controls
+├── ArtworkImage.swift       # Reusable async artwork view with placeholder
 ├── PlaylistManager.swift    # Playlist CRUD and persistence
 ├── HexVisualizerView.swift  # Canvas-based audio visualiser (60 fps)
-├── ContentView.swift        # Tab structure
+├── ContentView.swift        # Tab structure + mini player bar
 ├── PlaylistsView.swift      # Playlist list tab
 ├── PlaylistDetailView.swift # Tracks within a playlist
-├── NowPlayingView.swift     # Now Playing screen
-├── LibraryView.swift        # Full track library with search
-└── SettingsView.swift       # Appearance & in-app purchase
+├── NowPlayingView.swift     # Now Playing screen (artwork, speed, sleep timer)
+├── LibraryView.swift        # Full track library with search and bulk select
+└── SettingsView.swift       # Appearance settings
 ```
 
 ---
