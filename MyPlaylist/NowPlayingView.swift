@@ -207,10 +207,33 @@ struct NowPlayingView: View {
 
     private var bottomBar: some View {
         HStack {
-            Spacer()
-            Button {
-                cycleMode()
+            // Speed picker
+            Menu {
+                ForEach([Float(0.5), 0.75, 1.0, 1.25, 1.5, 2.0], id: \.self) { rate in
+                    Button { player.setPlaybackRate(rate) } label: {
+                        if player.playbackRate == rate {
+                            Label(speedLabel(rate), systemImage: "checkmark")
+                        } else {
+                            Text(speedLabel(rate))
+                        }
+                    }
+                }
             } label: {
+                Text(speedLabel(player.playbackRate))
+                    .font(.subheadline.weight(.semibold))
+                    .monospacedDigit()
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 10)
+                    .background(
+                        player.playbackRate != 1.0 ? Color.accentColor.opacity(0.15) : Color.primary.opacity(0.08),
+                        in: RoundedRectangle(cornerRadius: 8)
+                    )
+            }
+
+            Spacer()
+
+            // Playback mode
+            Button { cycleMode() } label: {
                 HStack(spacing: 6) {
                     Image(systemName: player.playbackMode.systemImage)
                     Text(LocalizedStringKey(player.playbackMode.rawValue))
@@ -218,7 +241,35 @@ struct NowPlayingView: View {
                 }
             }
             .accessibilityLabel("Playback mode: \(player.playbackMode.rawValue)")
+
             Spacer()
+
+            // Sleep timer
+            Menu {
+                if player.sleepTimerEnd != nil {
+                    Button("Cancel Timer", role: .destructive) { player.cancelSleepTimer() }
+                }
+                Button("15 min") { player.setSleepTimer(minutes: 15) }
+                Button("30 min") { player.setSleepTimer(minutes: 30) }
+                Button("45 min") { player.setSleepTimer(minutes: 45) }
+                Button("60 min") { player.setSleepTimer(minutes: 60) }
+            } label: {
+                Group {
+                    if let end = player.sleepTimerEnd {
+                        Text(TimeFormatter.format(max(0, end.timeIntervalSinceNow)))
+                            .monospacedDigit()
+                    } else {
+                        Image(systemName: "moon.zzz")
+                    }
+                }
+                .font(.subheadline.weight(.semibold))
+                .padding(.vertical, 6)
+                .padding(.horizontal, 10)
+                .background(
+                    player.sleepTimerEnd != nil ? Color.accentColor.opacity(0.15) : Color.primary.opacity(0.08),
+                    in: RoundedRectangle(cornerRadius: 8)
+                )
+            }
         }
     }
 
@@ -232,6 +283,10 @@ struct NowPlayingView: View {
         let all = PlaybackMode.allCases
         let idx = all.firstIndex(of: player.playbackMode) ?? 0
         player.setPlaybackMode(all[(idx + 1) % all.count])
+    }
+
+    private func speedLabel(_ rate: Float) -> String {
+        rate == 1.0 ? "1×" : String(format: "%.3g×", rate)
     }
 }
 // MARK: - SeekBar

@@ -15,6 +15,8 @@ class AudioPlayer: NSObject, ObservableObject {
     @Published private(set) var duration: TimeInterval = 0
     @Published private(set) var playbackMode: PlaybackMode = .next
     @Published private(set) var audioLevel: Float = 0
+    @Published private(set) var playbackRate: Float = 1.0
+    @Published private(set) var sleepTimerEnd: Date?
     @Published var playbackError: String?
 
     private var player: AVAudioPlayer?
@@ -24,6 +26,7 @@ class AudioPlayer: NSObject, ObservableObject {
     private var isSeeking = false
 
     private let modeKey = "playbackMode"
+    private let rateKey = "playbackRate"
 
     var currentArtwork: UIImage? {
         didSet { updateNowPlayingInfo() }
@@ -35,6 +38,8 @@ class AudioPlayer: NSObject, ObservableObject {
            let saved = PlaybackMode(rawValue: raw) {
             playbackMode = saved
         }
+        let savedRate = UserDefaults.standard.float(forKey: rateKey)
+        playbackRate = savedRate > 0 ? savedRate : 1.0
         setupRemoteControls()
         setupAudioSessionObservers()
     }
@@ -127,6 +132,21 @@ class AudioPlayer: NSObject, ObservableObject {
         UserDefaults.standard.set(mode.rawValue, forKey: modeKey)
     }
 
+    func setPlaybackRate(_ rate: Float) {
+        playbackRate = rate
+        player?.rate = rate
+        UserDefaults.standard.set(rate, forKey: rateKey)
+        updateNowPlayingInfo()
+    }
+
+    func setSleepTimer(minutes: Int) {
+        sleepTimerEnd = Date().addingTimeInterval(Double(minutes) * 60)
+    }
+
+    func cancelSleepTimer() {
+        sleepTimerEnd = nil
+    }
+
     // MARK: - Next-index logic (internal for testability)
 
     static func nextIndex(current: Int, count: Int, mode: PlaybackMode) -> Int? {
@@ -163,6 +183,7 @@ class AudioPlayer: NSObject, ObservableObject {
             let p = try AVAudioPlayer(contentsOf: track.fileURL)
             p.delegate = self
             p.isMeteringEnabled = true
+            p.enableRate = true
             p.prepareToPlay()
             player = p
             currentTrack = track
@@ -170,6 +191,7 @@ class AudioPlayer: NSObject, ObservableObject {
             duration = p.duration
             currentTime = 0
             p.play()
+            p.rate = playbackRate
             state = .playing
             startTimer()
             updateNowPlayingInfo()
@@ -272,7 +294,7 @@ class AudioPlayer: NSObject, ObservableObject {
             MPMediaItemPropertyTitle:              track.title,
             MPMediaItemPropertyPlaybackDuration:   duration,
             MPNowPlayingInfoPropertyElapsedPlaybackTime: currentTime,
-            MPNowPlayingInfoPropertyPlaybackRate:  state == .playing ? 1.0 : 0.0,
+            MPNowPlayingInfoPropertyPlaybackRate:  state == .playing ? Double(playbackRate) : 0.0,
             MPNowPlayingInfoPropertyDefaultPlaybackRate: 1.0,
         ]
         if let image = currentArtwork {
@@ -287,6 +309,11 @@ class AudioPlayer: NSObject, ObservableObject {
         let t = Timer(timeInterval: 1.0 / 30.0, repeats: true) { [weak self] _ in
             guard let self, let player = self.player else { return }
             self.currentTime = player.currentTime
+            if let end = self.sleepTimerEnd, Date() >= end {
+                self.sleepTimerEnd = nil
+                self.stop()
+                return
+            }
             player.updateMeters()
 
             // Blend peak (catches transient beats) with average (sustain) for a punchy feel
