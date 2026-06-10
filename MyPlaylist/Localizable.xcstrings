@@ -7,6 +7,18 @@
     "%lld tracks" : {
 
     },
+    "15 min" : {
+
+    },
+    "30 min" : {
+
+    },
+    "45 min" : {
+
+    },
+    "60 min" : {
+
+    },
     "Add from Library" : {
 
     },
@@ -139,7 +151,7 @@
     "Cancel" : {
 
     },
-    "Clear" : {
+    "Cancel Timer" : {
 
     },
     "Could not access the selected file." : {
@@ -474,6 +486,9 @@
       }
     },
     "Library" : {
+
+    },
+    "Light" : {
 
     },
     "My Playlists" : {
