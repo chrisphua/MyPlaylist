@@ -44,8 +44,11 @@ struct NowPlayingView: View {
             .onChange(of: player.state) { _ in if player.state == .stopped { seekValue = nil } }
             .task(id: player.currentTrack?.id) {
                 currentArtwork = nil
+                player.currentArtwork = nil
                 guard let track = player.currentTrack else { return }
-                currentArtwork = await library.artwork(for: track)
+                let art = await library.artwork(for: track)
+                currentArtwork = art
+                player.currentArtwork = art
             }
         }
     }

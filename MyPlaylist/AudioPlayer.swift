@@ -2,6 +2,7 @@ import Foundation
 import AVFoundation
 import MediaPlayer
 import Combine
+import UIKit
 
 enum PlayerState {
     case stopped, playing, paused
@@ -23,6 +24,10 @@ class AudioPlayer: NSObject, ObservableObject {
     private var isSeeking = false
 
     private let modeKey = "playbackMode"
+
+    var currentArtwork: UIImage? {
+        didSet { updateNowPlayingInfo() }
+    }
 
     override init() {
         super.init()
@@ -130,6 +135,8 @@ class AudioPlayer: NSObject, ObservableObject {
         case .next:
             let next = current + 1
             return next < count ? next : nil
+        case .repeatAll:
+            return (current + 1) % count
         case .repeatOne:
             return current
         case .shuffle:
@@ -159,6 +166,7 @@ class AudioPlayer: NSObject, ObservableObject {
             p.prepareToPlay()
             player = p
             currentTrack = track
+            currentArtwork = nil
             duration = p.duration
             currentTime = 0
             p.play()
@@ -260,13 +268,17 @@ class AudioPlayer: NSObject, ObservableObject {
             MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
             return
         }
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = [
+        var info: [String: Any] = [
             MPMediaItemPropertyTitle:              track.title,
             MPMediaItemPropertyPlaybackDuration:   duration,
             MPNowPlayingInfoPropertyElapsedPlaybackTime: currentTime,
             MPNowPlayingInfoPropertyPlaybackRate:  state == .playing ? 1.0 : 0.0,
             MPNowPlayingInfoPropertyDefaultPlaybackRate: 1.0,
         ]
+        if let image = currentArtwork {
+            info[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
+        }
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = info
     }
 
     private func startTimer() {
@@ -307,7 +319,7 @@ extension AudioPlayer: AVAudioPlayerDelegate {
         switch playbackMode {
         case .repeatOne:
             if let track = currentTrack { load(track: track) }
-        case .next, .shuffle:
+        case .next, .repeatAll, .shuffle:
             playNext()
         }
     }
