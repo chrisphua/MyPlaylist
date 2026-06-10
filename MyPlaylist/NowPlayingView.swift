@@ -9,7 +9,7 @@ struct NowPlayingView: View {
 
     @State private var seekValue: Double? = nil  // non-nil only while user is dragging
     @State private var currentArtwork: UIImage? = nil
-    @State private var showSleepTimerDialog = false
+    @State private var selectedSleepMinutes: Int = 0
 
     var body: some View {
         NavigationStack {
@@ -50,15 +50,6 @@ struct NowPlayingView: View {
                 let art = await library.artwork(for: track)
                 currentArtwork = art
                 player.currentArtwork = art
-            }
-            .confirmationDialog("Sleep Timer", isPresented: $showSleepTimerDialog, titleVisibility: .visible) {
-                if player.sleepTimerEnd != nil {
-                    Button("Cancel Timer", role: .destructive) { player.cancelSleepTimer() }
-                }
-                Button("15 minutes") { player.setSleepTimer(minutes: 15) }
-                Button("30 minutes") { player.setSleepTimer(minutes: 30) }
-                Button("45 minutes") { player.setSleepTimer(minutes: 45) }
-                Button("60 minutes") { player.setSleepTimer(minutes: 60) }
             }
         }
     }
@@ -250,8 +241,21 @@ struct NowPlayingView: View {
 
             Spacer()
 
-            // Sleep timer — Button + confirmationDialog uses UIAlertController, most reliable
-            Button { showSleepTimerDialog = true } label: {
+            // Sleep timer — Picker(.menu) matches speed pill, reliable tap
+            Picker(selection: Binding<Int>(
+                get: { selectedSleepMinutes },
+                set: { mins in
+                    selectedSleepMinutes = mins
+                    if mins == 0 { player.cancelSleepTimer() }
+                    else { player.setSleepTimer(minutes: mins) }
+                }
+            )) {
+                Text("Off").tag(0)
+                Text("15 min").tag(15)
+                Text("30 min").tag(30)
+                Text("45 min").tag(45)
+                Text("60 min").tag(60)
+            } label: {
                 Group {
                     if let end = player.sleepTimerEnd {
                         Text(TimeFormatter.format(max(0, end.timeIntervalSinceNow)))
@@ -268,7 +272,10 @@ struct NowPlayingView: View {
                 )
                 .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .pickerStyle(.menu)
+            .onChange(of: player.sleepTimerEnd) { end in
+                if end == nil { selectedSleepMinutes = 0 }
+            }
         }
     }
 
