@@ -19,6 +19,7 @@ struct LibraryView: View {
     @State private var selectedTrackIDs = Set<UUID>()
     @State private var showBulkAddToPlaylist = false
     @State private var showBulkDeleteConfirm = false
+    @State private var showSortDialog = false
 
     private var displayedTracks: [AudioTrack] {
         let sorted: [AudioTrack]
@@ -71,15 +72,21 @@ struct LibraryView: View {
                 }
             } else {
                 ToolbarItem(placement: .topBarLeading) {
-                    Menu {
-                        Picker("Sort", selection: $sortOrder) {
-                            Text("Newest First").tag("newest")
-                            Text("Oldest First").tag("oldest")
-                            Text("Title A–Z").tag("title")
-                            Text("Duration").tag("duration")
-                        }
-                    } label: {
+                    Button { showSortDialog = true } label: {
                         Image(systemName: "line.3.horizontal.decrease")
+                    }
+                    .popover(isPresented: $showSortDialog, arrowEdge: .top) {
+                        VStack(spacing: 0) {
+                            sortRow("Newest First", tag: "newest")
+                            Divider()
+                            sortRow("Oldest First", tag: "oldest")
+                            Divider()
+                            sortRow("Title A–Z", tag: "title")
+                            Divider()
+                            sortRow("Duration", tag: "duration")
+                        }
+                        .frame(minWidth: 220)
+                        .compactPopover()
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
@@ -171,6 +178,25 @@ struct LibraryView: View {
             }
             .presentationDetents([.medium, .large])
         }
+    }
+
+    // MARK: - Helpers
+
+    private func sortRow(_ title: String, tag: String) -> some View {
+        Button {
+            sortOrder = tag
+            showSortDialog = false
+        } label: {
+            HStack {
+                Text(title).foregroundStyle(.primary)
+                Spacer()
+                if sortOrder == tag { Image(systemName: "checkmark").foregroundStyle(.blue) }
+            }
+            .padding(.horizontal, 24)
+            .padding(.vertical, 12)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Subviews

@@ -9,6 +9,9 @@ struct NowPlayingView: View {
 
     @State private var seekValue: Double? = nil  // non-nil only while user is dragging
     @State private var currentArtwork: UIImage? = nil
+    @State private var showSpeedDialog = false
+    @State private var showSleepDialog = false
+    @State private var showAddToPlaylistDialog = false
     @State private var selectedSleepMinutes: Int = 0
 
     var body: some View {
@@ -23,22 +26,16 @@ struct NowPlayingView: View {
             .navigationTitle("Now Playing")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Menu {
-                        if playlistManager.playlists.isEmpty {
-                            Button("No playlists yet") {}.disabled(true)
-                        } else {
-                            ForEach(playlistManager.playlists) { playlist in
-                                Button(playlist.name) {
-                                    if let track = player.currentTrack {
-                                        playlistManager.addTrack(track, to: playlist)
-                                    }
-                                }
-                            }
-                        }
+                    Button {
+                        showAddToPlaylistDialog = true
                     } label: {
                         Label("Add to Playlist", systemImage: "text.badge.plus")
                     }
-                    .disabled(player.currentTrack == nil)
+                    .disabled(player.currentTrack == nil || playlistManager.playlists.isEmpty)
+                    .popover(isPresented: $showAddToPlaylistDialog, arrowEdge: .top) {
+                        addToPlaylistPopover
+                            .compactPopover()
+                    }
                 }
             }
             .onChange(of: player.currentTrack?.id) { _ in seekValue = nil }
@@ -141,7 +138,7 @@ struct NowPlayingView: View {
             }
             .padding(.horizontal, 32)
 
-            Spacer().frame(height: 48)
+            Spacer().frame(height: 80)
         }
     }
 
@@ -208,24 +205,21 @@ struct NowPlayingView: View {
 
     private var bottomBar: some View {
         HStack {
-            // Speed picker — Picker(.menu) uses UIButton+UIMenu internally, more reliable than Menu
-            Picker(selection: Binding(get: { player.playbackRate },
-                                      set: { player.setPlaybackRate($0) })) {
-                ForEach([Float(0.5), 0.75, 1.0, 1.25, 1.5, 2.0], id: \.self) { rate in
-                    Text(speedLabel(rate)).tag(rate)
-                }
-            } label: {
+            // Speed
+            Button { showSpeedDialog = true } label: {
                 Text(speedLabel(player.playbackRate))
                     .font(.subheadline.weight(.semibold))
                     .monospacedDigit()
-                    .frame(width: 58, height: 30)
+                    .frame(width: 58, height: 44)
                     .background(
                         player.playbackRate != 1.0 ? Color.accentColor.opacity(0.15) : Color.primary.opacity(0.08),
                         in: RoundedRectangle(cornerRadius: 8)
                     )
-                    .contentShape(Rectangle())
             }
-            .pickerStyle(.menu)
+            .buttonStyle(.plain)
+            .popover(isPresented: $showSpeedDialog, arrowEdge: .bottom) {
+                speedPopover.compactPopover()
+            }
 
             Spacer()
 
@@ -241,42 +235,119 @@ struct NowPlayingView: View {
 
             Spacer()
 
-            // Sleep timer — Picker(.menu) matches speed pill, reliable tap
-            Picker(selection: Binding<Int>(
-                get: { selectedSleepMinutes },
-                set: { mins in
-                    selectedSleepMinutes = mins
-                    if mins == 0 { player.cancelSleepTimer() }
-                    else { player.setSleepTimer(minutes: mins) }
-                }
-            )) {
-                Text("Off").tag(0)
-                Text("15 min").tag(15)
-                Text("30 min").tag(30)
-                Text("45 min").tag(45)
-                Text("60 min").tag(60)
-            } label: {
-                Group {
-                    if let end = player.sleepTimerEnd {
-                        Text(TimeFormatter.format(max(0, end.timeIntervalSinceNow)))
-                            .monospacedDigit()
-                    } else {
-                        Image(systemName: "moon.zzz")
-                    }
+            // Sleep timer
+            Button { showSleepDialog = true } label: {
+                ZStack {
+                    Text(player.sleepTimerEnd.map {
+                        TimeFormatter.format(max(0, $0.timeIntervalSinceNow).rounded(.up))
+                    } ?? "")
+                    .monospacedDigit()
+                    .opacity(player.sleepTimerEnd != nil ? 1 : 0)
+
+                    Image(systemName: "moon.zzz")
+                        .opacity(player.sleepTimerEnd == nil ? 1 : 0)
                 }
                 .font(.subheadline.weight(.semibold))
-                .frame(width: 58, height: 30)
+                .frame(width: 58, height: 44)
                 .background(
                     player.sleepTimerEnd != nil ? Color.accentColor.opacity(0.15) : Color.primary.opacity(0.08),
                     in: RoundedRectangle(cornerRadius: 8)
                 )
-                .contentShape(Rectangle())
             }
-            .pickerStyle(.menu)
+            .buttonStyle(.plain)
+            .popover(isPresented: $showSleepDialog, arrowEdge: .bottom) {
+                sleepPopover.compactPopover()
+            }
             .onChange(of: player.sleepTimerEnd) { end in
                 if end == nil { selectedSleepMinutes = 0 }
             }
         }
+    }
+
+    private var speedPopover: some View {
+        let rates: [Float] = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0]
+        return VStack(spacing: 0) {
+            ForEach(Array(rates.enumerated()), id: \.offset) { idx, rate in
+                Button {
+                    player.setPlaybackRate(rate)
+                    showSpeedDialog = false
+                } label: {
+                    HStack {
+                        Text(speedLabel(rate)).foregroundStyle(.primary)
+                        Spacer()
+                        if player.playbackRate == rate {
+                            Image(systemName: "checkmark").foregroundStyle(.blue)
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                if idx < rates.count - 1 { Divider() }
+            }
+        }
+        .frame(minWidth: 200)
+    }
+
+    private var sleepPopover: some View {
+        VStack(spacing: 0) {
+            sleepOptionRow("Off", minutes: 0)
+            Divider()
+            sleepOptionRow("15 minutes", minutes: 15)
+            Divider()
+            sleepOptionRow("30 minutes", minutes: 30)
+            Divider()
+            sleepOptionRow("45 minutes", minutes: 45)
+            Divider()
+            sleepOptionRow("60 minutes", minutes: 60)
+        }
+        .frame(minWidth: 220)
+    }
+
+    private func sleepOptionRow(_ title: String, minutes: Int) -> some View {
+        Button {
+            if minutes == 0 { player.cancelSleepTimer() } else { player.setSleepTimer(minutes: minutes) }
+            selectedSleepMinutes = minutes
+            showSleepDialog = false
+        } label: {
+            HStack {
+                Text(title).foregroundStyle(.primary)
+                Spacer()
+                if selectedSleepMinutes == minutes {
+                    Image(systemName: "checkmark").foregroundStyle(.blue)
+                }
+            }
+            .padding(.horizontal, 24)
+            .padding(.vertical, 12)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var addToPlaylistPopover: some View {
+        let playlists = playlistManager.playlists
+        return VStack(spacing: 0) {
+            ForEach(Array(playlists.enumerated()), id: \.element.id) { idx, playlist in
+                Button {
+                    if let track = player.currentTrack {
+                        playlistManager.addTrack(track, to: playlist)
+                    }
+                    showAddToPlaylistDialog = false
+                } label: {
+                    HStack {
+                        Text(playlist.name).foregroundStyle(.primary)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                if idx < playlists.count - 1 { Divider() }
+            }
+        }
+        .frame(minWidth: 240)
     }
 
     // MARK: - Helpers
@@ -295,6 +366,24 @@ struct NowPlayingView: View {
         rate == 1.0 ? "1×" : String(format: "%.3g×", rate)
     }
 }
+// MARK: - Compact popover helper (forces popover on iPhone; iOS 16.4+)
+
+extension View {
+    func compactPopover() -> some View {
+        modifier(CompactPopoverModifier())
+    }
+}
+
+private struct CompactPopoverModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 16.4, *) {
+            content.presentationCompactAdaptation(.popover)
+        } else {
+            content
+        }
+    }
+}
+
 // MARK: - SeekBar
 
 private struct SeekBar: View {

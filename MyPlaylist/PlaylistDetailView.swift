@@ -16,6 +16,7 @@ struct PlaylistDetailView: View {
     @State private var newName = ""
     @State private var editMode: EditMode = .inactive
     @State private var searchText = ""
+    @State private var showActionsDialog = false
 
     private var live: Playlist { playlistManager.live(playlist) }
     private var tracks: [AudioTrack] { playlistManager.tracks(in: live, from: library) }
@@ -46,30 +47,26 @@ struct PlaylistDetailView: View {
                 if library.isImporting {
                     ProgressView()
                 } else {
-                    Menu {
-                        Button {
-                            showImporter = true
-                        } label: {
-                            Label("Import from Files", systemImage: "folder")
-                        }
-                        Button { showAddFromLibrary = true } label: {
-                            Label("Add from Library", systemImage: "music.note.list")
-                        }
-                        Divider()
-                        Button {
-                            newName = live.name
-                            showRename = true
-                        } label: {
-                            Label("Rename Playlist", systemImage: "pencil")
-                        }
-                        Button {
-                            editMode = editMode == .active ? .inactive : .active
-                        } label: {
-                            Label(editMode == .active ? "Done" : "Reorder / Remove",
-                                  systemImage: editMode == .active ? "checkmark" : "arrow.up.arrow.down")
-                        }
+                    Button {
+                        showActionsDialog = true
                     } label: {
                         Image(systemName: "ellipsis.circle")
+                    }
+                    .popover(isPresented: $showActionsDialog, arrowEdge: .top) {
+                        VStack(spacing: 0) {
+                            actionRow("Import from Files", icon: "folder") { showImporter = true }
+                            Divider()
+                            actionRow("Add from Library", icon: "music.note.list") { showAddFromLibrary = true }
+                            Divider()
+                            actionRow("Rename Playlist", icon: "pencil") { newName = live.name; showRename = true }
+                            Divider()
+                            actionRow(
+                                editMode == .active ? "Done" : "Reorder / Remove",
+                                icon: editMode == .active ? "checkmark" : "arrow.up.arrow.down"
+                            ) { editMode = editMode == .active ? .inactive : .active }
+                        }
+                        .frame(minWidth: 250)
+                        .compactPopover()
                     }
                 }
             }
@@ -104,6 +101,23 @@ struct PlaylistDetailView: View {
             Button("Save") { playlistManager.rename(playlistID: live.id, to: newName) }
             Button("Cancel", role: .cancel) {}
         }
+    }
+
+    private func actionRow(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
+        Button {
+            action()
+            showActionsDialog = false
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: icon).frame(width: 20)
+                Text(title).foregroundStyle(.primary)
+                Spacer()
+            }
+            .padding(.horizontal, 24)
+            .padding(.vertical, 12)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Subviews

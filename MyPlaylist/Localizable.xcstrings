@@ -7,18 +7,6 @@
     "%lld tracks" : {
 
     },
-    "15 min" : {
-
-    },
-    "30 min" : {
-
-    },
-    "45 min" : {
-
-    },
-    "60 min" : {
-
-    },
     "Add from Library" : {
 
     },
@@ -151,9 +139,6 @@
     "Cancel" : {
 
     },
-    "Cancel Timer" : {
-
-    },
     "Could not access the selected file." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -242,9 +227,6 @@
 
     },
     "Done" : {
-
-    },
-    "Duration" : {
 
     },
     "Go to Playlist and tap a song to start playing." : {
@@ -424,9 +406,6 @@
     "Import Files" : {
 
     },
-    "Import from Files" : {
-
-    },
     "Legal" : {
       "localizations" : {
         "ar" : {
@@ -500,9 +479,6 @@
     "New Playlist" : {
 
     },
-    "Newest First" : {
-
-    },
     "Next" : {
       "localizations" : {
         "ar" : {
@@ -562,9 +538,6 @@
       }
     },
     "No Playlists — create one in My Playlists" : {
-
-    },
-    "No playlists yet" : {
 
     },
     "No Results" : {
@@ -922,9 +895,6 @@
           }
         }
       }
-    },
-    "Oldest First" : {
-
     },
     "Pause" : {
       "localizations" : {
@@ -1355,9 +1325,6 @@
     "Rename Track" : {
 
     },
-    "Reorder / Remove" : {
-
-    },
     "Repeat One" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1664,9 +1631,6 @@
         }
       }
     },
-    "Sort" : {
-
-    },
     "Tap + to create your first playlist." : {
 
     },
@@ -1732,9 +1696,6 @@
 
     },
     "Title" : {
-
-    },
-    "Title A–Z" : {
 
     },
     "User Agreement" : {
