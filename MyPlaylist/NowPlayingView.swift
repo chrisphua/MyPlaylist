@@ -222,14 +222,12 @@ struct NowPlayingView: View {
                 Text(speedLabel(player.playbackRate))
                     .font(.subheadline.weight(.semibold))
                     .monospacedDigit()
-                    .frame(minWidth: 38)
-                    .padding(.vertical, 6)
-                    .padding(.horizontal, 10)
+                    .frame(width: 58, height: 30)
                     .background(
                         player.playbackRate != 1.0 ? Color.accentColor.opacity(0.15) : Color.primary.opacity(0.08),
                         in: RoundedRectangle(cornerRadius: 8)
                     )
-                    .animation(.none, value: player.playbackRate)
+                    .contentShape(Rectangle())
             }
 
             Spacer()
@@ -265,14 +263,12 @@ struct NowPlayingView: View {
                     }
                 }
                 .font(.subheadline.weight(.semibold))
-                .frame(minWidth: 38)
-                .padding(.vertical, 6)
-                .padding(.horizontal, 10)
+                .frame(width: 58, height: 30)
                 .background(
                     player.sleepTimerEnd != nil ? Color.accentColor.opacity(0.15) : Color.primary.opacity(0.08),
                     in: RoundedRectangle(cornerRadius: 8)
                 )
-                .animation(.none, value: player.sleepTimerEnd == nil)
+                .contentShape(Rectangle())
             }
         }
     }
